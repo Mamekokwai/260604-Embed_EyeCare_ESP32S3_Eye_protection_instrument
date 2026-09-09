@@ -1,4 +1,5 @@
 #include "app_settings.h"
+#include "sdkconfig.h"
 
 #include <stdbool.h>
 
@@ -31,9 +32,14 @@ esp_err_t app_settings_init(void)
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
         ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
+#if CONFIG_EYECARE_PRODUCTION_LOCK
+        /* 生产模式不能自动擦除 NVS：设备序列号和失败锁定计数必须保留。 */
+        return ret;
+#else
         ret = nvs_flash_erase();
         if (ret == ESP_OK)
             ret = nvs_flash_init();
+#endif
     }
     return ret;
 }
