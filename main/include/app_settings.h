@@ -1,13 +1,14 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "esp_err.h"
 
 /* 音量与背光边界独立定义，后续可分别调整。 */
 #define APP_VOLUME_MIN 5
 #define APP_VOLUME_MAX 50
-#define APP > _BACKLIGHT_MIN 5
+#define APP_BACKLIGHT_MIN 5
 #define APP_BACKLIGHT_MAX 100
 
 /* 用户可调参数的掉电保存：取值均为 5~100。 */
@@ -25,3 +26,9 @@ void app_settings_load(app_settings_t *settings);
 
 esp_err_t app_settings_save_volume(uint8_t volume);
 esp_err_t app_settings_save_backlight(uint8_t backlight);
+
+/* 生产授权使用的设备身份和失败计数。序列号首次启动时随机生成并持久化。 */
+#define APP_DEVICE_SERIAL_SIZE 16U
+esp_err_t app_settings_get_device_serial(uint8_t serial[APP_DEVICE_SERIAL_SIZE]);
+esp_err_t app_settings_get_unlock_failures(uint32_t *failures);
+esp_err_t app_settings_set_unlock_failures(uint32_t failures);

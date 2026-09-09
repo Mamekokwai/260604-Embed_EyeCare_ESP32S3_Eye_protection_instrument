@@ -1,21 +1,40 @@
 menu "Eye-care production security"
 
     config EYECARE_PRODUCTION_LOCK
-        bool "Require a signed SD-card token before first use"
+        bool "Require per-device USB authorization before first use"
         default n
         select EFUSE_CUSTOM_TABLE
         help
             Enables EYECARE_ENABLE_ENCRYPTION in main/include/production_unlock.h.
-            On a device whose permanent unlock eFuse is not set, start only
-            the SD-card unlock loop. A shared ECDSA P-256 signed token must
-            be present at /eyecare.unlock (not device-bound; one card unlocks
-            every device). Successful verification burns the one-way unlock
-            eFuse and normal application startup continues.
+            A locked device waits on USB Serial-JTAG for READ_ID, CHALLENGE,
+            and a device-bound P-256 ACTIVATE frame. Only a token containing
+            this device's eFuse MAC, NVS serial, and current challenge may
+            burn the one-way unlock eFuse.
 
     config EYECARE_UNLOCK_RETRY_MS
-        int "Unlock token retry interval (ms)"
+        int "USB authorization polling interval (ms)"
         depends on EYECARE_PRODUCTION_LOCK
         range 250 10000
         default 1000
+
+    config EYECARE_UNLOCK_TEST_MODE
+        bool "Use test unlock failure threshold"
+        depends on EYECARE_PRODUCTION_LOCK
+        default n
+        help
+            Use the 100-attempt threshold for development-board testing.
+            Leave disabled for production, which uses the 10-attempt limit.
+
+    config EYECARE_UNLOCK_FAILURE_THRESHOLD_TEST
+        int "Test unlock failure threshold"
+        depends on EYECARE_PRODUCTION_LOCK
+        range 1 100000
+        default 100
+
+    config EYECARE_UNLOCK_FAILURE_THRESHOLD_PRODUCTION
+        int "Production unlock failure threshold"
+        depends on EYECARE_PRODUCTION_LOCK
+        range 1 100000
+        default 10
 
 endmenu

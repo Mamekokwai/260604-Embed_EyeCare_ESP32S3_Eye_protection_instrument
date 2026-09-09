@@ -9,14 +9,14 @@ flowchart TD
     BOOT[签名应用启动] --> FLAG{EYECARE_UNLOCKED eFuse?}
     FLAG -->|是| APP[初始化 LCD / 音频 / UART / 媒体]
     FLAG -->|否| SD[仅挂载 TF 卡]
-    SD --> TOKEN[循环读取 /eyecare.unlock]
+    USB --> TOKEN[READ_ID / CHALLENGE / ACTIVATE 单机授权]
     TOKEN --> VERIFY{P-256 签名正确?}
     VERIFY -->|否| SD
     VERIFY -->|是| BURN[写入并回读永久 eFuse 位]
     BURN --> APP
 ```
 
-生产锁只由 `sdkconfig.production.defaults` 启用；开发构建直接进入应用。私钥不在 TF 卡和固件中，TF 卡只有由解锁私钥签名的通用授权令牌（不绑定设备，可解锁所有设备）。生产内容保密依赖 Secure Boot V2 与 Release 模式 Flash Encryption，详见上级目录 [`SECURITY_PROVISIONING.md`](../SECURITY_PROVISIONING.md)。
+生产锁只由 `sdkconfig.production.defaults` 启用；开发构建直接进入应用。私钥不在 TF 卡和固件中，USB 授权帧绑定设备 MAC、NVS 序列号和一次性 challenge。生产内容保密依赖 Secure Boot V2 与 Release 模式 Flash Encryption，详见上级目录 [`SECURITY_PROVISIONING.md`](../SECURITY_PROVISIONING.md)。
 
 ## 总体媒体链路
 

@@ -2,12 +2,16 @@
 
 #include <stdbool.h>
 
+#include "esp_system.h"
+#include "esp_random.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 
 #define SETTINGS_NAMESPACE "eyecare"
 #define SETTINGS_KEY_VOLUME "volume"
 #define SETTINGS_KEY_BACKLIGHT "backlight"
+#define SETTINGS_KEY_DEVICE_SERIAL "device_serial"
+#define SETTINGS_KEY_UNLOCK_FAILURES "unlock_failures"
 #define DEFAULT_VOLUME 70
 #define DEFAULT_BACKLIGHT 100
 
@@ -81,4 +85,62 @@ esp_err_t app_settings_save_volume(uint8_t volume)
 esp_err_t app_settings_save_backlight(uint8_t backlight)
 {
     return save_percent(SETTINGS_KEY_BACKLIGHT, backlight, APP_BACKLIGHT_MIN);
+}
+
+esp_err_t app_settings_get_device_serial(uint8_t serial[APP_DEVICE_SERIAL_SIZE])
+{
+    if (!serial)
+        return ESP_ERR_INVALID_ARG;
+
+    nvs_handle_t handle;
+    esp_err_t ret = nvs_open(SETTINGS_NAMESPACE, NVS_READWRITE, &handle);
+    if (ret != ESP_OK)
+        return ret;
+
+    size_t length = APP_DEVICE_SERIAL_SIZE;
+    ret = nvs_get_blob(handle, SETTINGS_KEY_DEVICE_SERIAL, serial, &length);
+    if (ret == ESP_ERR_NVS_NOT_FOUND)
+    {
+        esp_fill_random(serial, APP_DEVICE_SERIAL_SIZE);
+        ret = nvs_set_blob(handle, SETTINGS_KEY_DEVICE_SERIAL,
+                           serial, APP_DEVICE_SERIAL_SIZE);
+        if (ret == ESP_OK)
+            ret = nvs_commit(handle);
+    }
+    else if (ret == ESP_OK && length != APP_DEVICE_SERIAL_SIZE)
+    {
+        ret = ESP_ERR_INVALID_SIZE;
+    }
+    nvs_close(handle);
+    return ret;
+}
+
+esp_err_t app_settings_get_unlock_failures(uint32_t *failures)
+{
+    if (!failures)
+        return ESP_ERR_INVALID_ARG;
+    *failures = 0;
+
+    nvs_handle_t handle;
+    esp_err_t ret = nvs_open(SETTINGS_NAMESPACE, NVS_READONLY, &handle);
+    if (ret != ESP_OK)
+        return ret == ESP_ERR_NVS_NOT_FOUND ? ESP_OK : ret;
+    ret = nvs_get_u32(handle, SETTINGS_KEY_UNLOCK_FAILURES, failures);
+    if (ret == ESP_ERR_NVS_NOT_FOUND)
+        ret = ESP_OK;
+    nvs_close(handle);
+    return ret;
+}
+
+esp_err_t app_settings_set_unlock_failures(uint32_t failures)
+{
+    nvs_handle_t handle;
+    esp_err_t ret = nvs_open(SETTINGS_NAMESPACE, NVS_READWRITE, &handle);
+    if (ret != ESP_OK)
+        return ret;
+    ret = nvs_set_u32(handle, SETTINGS_KEY_UNLOCK_FAILURES, failures);
+    if (ret == ESP_OK)
+        ret = nvs_commit(handle);
+    nvs_close(handle);
+    return ret;
 }

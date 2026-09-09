@@ -238,6 +238,20 @@ static void boot_gate(void)
     vTaskDelay(pdMS_TO_TICKS(300));
     while (1)
     {
+#if EYECARE_ENABLE_ENCRYPTION
+        /* 生产锁定设备先走 USB Serial-JTAG 单机授权，不依赖 TF 卡。 */
+        if (!esp_efuse_read_field_bit(ESP_EFUSE_USER_DATA_EYECARE_UNLOCKED))
+        {
+            ESP_LOGW(TAG, "Device locked; waiting for USB authorization");
+            gbk_show_unlock_text(120, 150, BLACK);
+            if (!production_unlock_ensure())
+            {
+                vTaskDelay(pdMS_TO_TICKS(500));
+                continue;
+            }
+            spilcd_clear(WHITE);
+        }
+#endif
         /* 1. 检查 SD 卡 */
         esp_err_t sd_ret = sd_card_mount();
         if (sd_ret != ESP_OK)

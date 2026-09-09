@@ -225,3 +225,15 @@ STATUS\n
 VSTOP\n
 ASTOP\n
 ```
+
+## 生产锁定阶段（USB Serial-JTAG）
+
+启用 `EYECARE_PRODUCTION_LOCK` 且 `EYECARE_UNLOCKED` 尚未置位时，设备尚未进入普通 UART1/媒体主循环，只接受 USB Serial-JTAG 上的单机授权命令：
+
+```text
+READ_ID\r\n
+CHALLENGE\r\n
+ACTIVATE <由 unlock_token.py 生成的十六进制帧>\r\n
+```
+
+`READ_ID` 返回出厂 MAC 和 NVS 16 字节序列号；`CHALLENGE` 返回一次性随机 nonce。上位机必须用离线 P-256 私钥对 nonce、MAC 和序列号签名，再发送 `ACTIVATE`。成功响应为 `ATC_OK` 并永久写入 eFuse；设备不匹配返回 `INVALID_FOR_DEVICE`，失败次数达到阈值后返回 `ERR_LOCKED`。该流程不再读取 TF 卡 `/eyecare.unlock`。
