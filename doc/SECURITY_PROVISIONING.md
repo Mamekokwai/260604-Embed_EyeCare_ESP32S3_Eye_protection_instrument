@@ -37,7 +37,7 @@ signature_length(1) | ECDSA-P256-DER-signature(<=72)
 
 ## 失败锁定
 
-失败计数保存在 NVS `eyecare` 命名空间的 `unlock_failures` 键中。生产模式默认 10 次失败后永久返回 `ERR_LOCKED`；开发测试可启用 `EYECARE_UNLOCK_TEST_MODE`，使用默认 100 次阈值。计数达到阈值后，即使随后收到正确授权也拒绝，需返厂处理。NVS 擦除会影响该计数，因此量产必须同时启用 NVS 加密并限制物理调试入口。
+失败计数保存在 NVS `eyecare` 命名空间的 `unlock_failures` 键中。生产模式默认 10 次失败后永久返回 `ERR_LOCKED`；开发测试可启用 `EYECARE_UNLOCK_TEST_MODE`，使用默认 100 次阈值。计数达到阈值后，即使随后收到正确授权也拒绝，需返厂处理。生产代码禁止因 NVS 空间异常自动擦除分区；量产必须同时启用 NVS 加密并限制物理调试入口。
 
 ## 离线签发工具
 
