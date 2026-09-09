@@ -239,8 +239,12 @@ static void handle_unlock_line(const char *line, uint32_t *failures,
 
     uint8_t token[UNLOCK_TOKEN_MAX];
     size_t token_size = 0;
-    if (hex_decode(line + 9U, token, sizeof(token), &token_size) != ESP_OK ||
-        !verify_token(token, token_size))
+    bool token_valid =
+        hex_decode(line + 9U, token, sizeof(token), &token_size) == ESP_OK &&
+        verify_token(token, token_size);
+    /* 每个 ACTIVATE 尝试都消耗 challenge，避免同一帧被重复提交。 */
+    s_nonce_valid = false;
+    if (!token_valid)
     {
         record_failure(failures);
         usb_write_line(is_locked(*failures) ? "ERR_LOCKED" : "INVALID_FOR_DEVICE");
