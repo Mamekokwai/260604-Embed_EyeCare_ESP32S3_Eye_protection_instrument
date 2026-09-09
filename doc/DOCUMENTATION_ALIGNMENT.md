@@ -1,58 +1,16 @@
-# 文档一致性清单（2026-09-05）
+# 文档与固件一致性记录
 
-## 仓库当前文档
+本仓库以 `doc/CURRENT_IMPLEMENTATION.md` 为事实基准，完整协议见 `doc/UART_COMMANDS.md`，移植说明见 `doc/PORTING.md`，生产安全流程见 `doc/SECURITY_PROVISIONING.md`。
 
-| 文档 | 状态 | 作用 |
-|---|---|---|
-| `CURRENT_IMPLEMENTATION.md` | 当前基准 | 硬件、总线、媒体、分区事实表（已含 V1.4 背光 GPIO1） |
-| `README.md` | 已对齐 | 构建、目录、引脚、媒体限制（V1.4、背光、通用令牌、APLAY 自动轮播） |
-| `UART_COMMANDS.md` | 已对齐 | 全部当前指令、递归路径、编码转换、并发规则（背光已改 ESP32 控制） |
-| `SECURITY_PROVISIONING.md` | 已对齐 | 密钥分工、通用令牌、生产构建、不可逆烧录与验收 |
-| `PORTING.md` | 已对齐 | 与芯片型号无关的模块、UART 和 workspace 移植说明 |
-| `TODO.md` | 已对齐 | 量产前安全、工具链和验收事项 |
-| `AGENTS.md` | 唯一 AI 入口 | 仓库开发规则、当前硬件约束和 AI 工作上下文 |
-| `Map/media_pipeline_archify.md` | 已对齐 | 媒体与生产启动链路（通用令牌） |
-| `Map/sd-resource-rule.architecture.json` + HTML | 已同步 | TF 递归目录及当前工具路径 |
-| `Map/production-unlock.html` + JSON | 已同步 | 生产解锁生命周期图（通用令牌） |
-| `hardware/ESP8311.docx` | 硬件参考 | ES8311 原始硬件资料 |
-| `issue/` | 历史归档 | 已解决问题和 RCA，不作为当前实现依据 |
+## 本次安全架构更新
 
-## Obsidian 项目文档
+- 生产授权已从 TF 卡共享 `/eyecare.unlock` 改为 USB Serial-JTAG 单机授权。
+- `READ_ID` 返回 eFuse MAC 与 NVS 16 字节设备序列号。
+- `CHALLENGE` 生成一次性随机 nonce；`ACTIVATE` 的 P-256 签名绑定 nonce、MAC、序列号。
+- 验签成功后才写入 `EYECARE_UNLOCKED` eFuse；失败计数持久化到 NVS，达到阈值后返回 `ERR_LOCKED`。
+- `unlock_token.py` 与 `unlock_provision.sh` 已按新帧格式更新；不再向 TF 卡写入解锁文件。
+- 开发配置仍关闭 Secure Boot、Flash Encryption 和生产锁定，避免误烧开发板。
 
-目录：`E:\Note\Obsidian\笔记\开发\嵌入式\项目\2026\0604眼保仪_ESP32S3_320x320`
+## 维护规则
 
-已重写为当前事实：
-
-- `项目简介.md`
-- `软件设计/ESP 32-S 3 UART 指令手册.md`
-- `软件设计/SDMMC.md`
-- `软件设计/TF卡配置要点.md`
-- `软件设计/生产安全与一次性解锁.md`：通用令牌 + 启动门流程（无卡`请插入SD卡` / 未解锁`请解密`，内嵌 GBK 字库）。
-- `环境配置/烧录方法.md`：通用令牌 + 一键脚本 `unlock_provision.sh`。
-- `项目简介.md`：V1.4、背光 GPIO1、通用令牌、启动门。
-- `硬件设计/关键硬件网络连接.md`（新增 2026-09-01）：V1.4 网络表权威；屏连接器 P1/P2 → MCU 脚位、U10 QFN56 pin→GPIO 全表、U7 外设、背光链路、通用网络、核对清单。
-
-硬件引脚旧笔记 `硬件设计/电气引脚V1.0.md` 保留为历史版本（V1.4 以 `关键硬件网络连接.md` 为准）。
-
-以下保留历史内容，但已显式标记为历史/归档，不能作为当前接线或固件依据：
-
-- `开发经验.md`：时间序列调试日志。
-- `硬件设计/元器件选择.md`：早期裸片/QSPI/MAX98357 选型。
-- `硬件设计/开发板和WA54TE057I-20Z的连接.md`：早期开发板 QSPI 验证。
-- `硬件设计/WA54TE057I-20Z脚位连接详细说明.md`：早期 QSPI 原理图教程。
-- `ISSUE/ESP32-S3 SPI 模式下 TF 卡只能跑 20 MHz，大于20 MHz 卡初始化失败.md`：仅适用 SPI fallback；当前正常路径是 SDMMC 1-bit 40 MHz。
-
-RCA 文档保留故障发生时的上下文。原空白的 `问题分析/AVI 和 raw 在不同图像大小下的帧率分析.md` 已补成“待实机数据”的测量计划，避免把缺失数据当成结论。
-
-## 已消除的主要冲突
-
-- QSPI/单屏/无 TF/MAX98357 历史方案与当前 i80 双屏/SDMMC/ES8311 混写。
-- TF 当前正常协议为 SDMMC 1-bit 40 MHz；SPI 20 MHz 仅是 fallback，媒体索引递归扫描子目录。
-- LCD WR/TE/RESET、TF CMD/D0、UART TX、USB 引脚角色错误。
-- **背光归属冲突**：旧 V1.1 背光由 CA51 控制、GPIO1 作 TE；V1.4 无 TE、GPIO1 为 ESP32 LEDC 背光 PWM（固件已适配，`LCD_BACKLIGHT`）。
-- **令牌绑定冲突**：设备绑定令牌 → 通用令牌（不绑定设备，一卡解锁所有设备）。
-- **编码冲突**：FATFS UTF-8 → CODEPAGE_936/GBK（`d_name` 和媒体递归路径在固件内部为 GBK），支持屏幕中文（内嵌提示字库 + `/SYSTEM/FONT/GBK16.FON` SDLIST 文件名）；UART1 默认输出 GBK，USB Serial-JTAG 默认将中文转换为 UTF-8，两路可用 `ENC UTF8|GBK` 独立切换。
-- 文档仍存在待清理的 `tools/convert.sh` 表述；`BL`、UART1/USB 双链路业务通信和独立响应编码已在当前固件实现，UART0 不参与业务通信。
-- `idf.py flash` 被误写为自动进入 monitor。
-- 开发与生产分区偏移混用；生产签名 bootloader 空间不足。
-- 把 SD 上的私钥误当作安全解锁方案；现改为离线私钥签发通用令牌。
+修改安全协议、引脚、外设链路或启动行为时，同时更新事实表、UART 文档、生产安全文档和相关流程图。外部 Obsidian 笔记作为需求/RCA 参考，不替代仓库事实表。

@@ -1,8 +1,8 @@
-# doc/Map 说明
+# 文档地图
 
-本目录存放 Archify 流程图/架构图。
+本目录保存媒体链路和生产启动流程图。图源应与 `doc/CURRENT_IMPLEMENTATION.md`、`doc/SECURITY_PROVISIONING.md` 同步。
 
-- [`media_pipeline_archify.md`](media_pipeline_archify.md)：视频、音频、图像三条媒体链路流程图（Mermaid）。
-- [`sd-playback-chain.html`](sd-playback-chain.html)：SD 卡 → 屏幕 / 喇叭 播放链路交互式数据流图（Archify 渲染，支持明暗主题、缩放、聚焦、导出）。源规格：[`sd-playback-chain.dataflow.json`](sd-playback-chain.dataflow.json)。
-- [`sd-resource-rule.html`](sd-resource-rule.html)：**SD 卡资源判断规则**交互式架构图（制作资源参考：后缀→格式→限额→输出，含三类资源规范卡片）。源规格：[`sd-resource-rule.architecture.json`](sd-resource-rule.architecture.json)。
-- [`production-unlock.html`](production-unlock.html)：**生产加密授权解锁流程**交互式生命周期图（Secure Boot/Flash Encryption 门 → eFuse 永久解锁位 → 一次性令牌验签）。源规格：[`production-unlock.lifecycle.json`](production-unlock.lifecycle.json)。
+- `media_pipeline_archify.md`：视频、音频、图片和启动授权链路（Mermaid）。
+- `sd-playback-chain.html` / `sd-playback-chain.dataflow.json`：SD 播放数据流。
+- `sd-resource-rule.html` / `sd-resource-rule.architecture.json`：SD 资源规则。
+- `production-unlock.html` / `production-unlock.lifecycle.json`：生产安全启动生命周期；授权阶段为 USB Serial-JTAG 的 READ_ID、CHALLENGE、ACTIVATE 单机绑定，不再使用 TF 卡共享令牌。
