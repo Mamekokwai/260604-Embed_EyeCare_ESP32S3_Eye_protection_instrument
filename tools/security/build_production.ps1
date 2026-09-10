@@ -21,6 +21,7 @@ $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $buildPath = Join-Path $projectRoot $BuildDir
 $sdkconfigPath = Join-Path $projectRoot $Sdkconfig
 $localDefaults = Join-Path $buildPath "sdkconfig.production.local.defaults"
+$sdkconfigForBuild = Join-Path $buildPath "sdkconfig.production"
 Set-Location -LiteralPath $projectRoot
 
 if (-not (Test-Path -LiteralPath $UnlockKey -PathType Leaf)) {
@@ -63,7 +64,7 @@ $defaults = @(
 $defaultsValue = $defaults -join ";"
 
 Write-Host "[1/2] Building production image in $buildPath"
-& idf.py -B $BuildDir -D "SDKCONFIG=$Sdkconfig" -D "SDKCONFIG_DEFAULTS=$defaultsValue" build
+& idf.py -B $BuildDir -D "SDKCONFIG=$sdkconfigForBuild" -D "SDKCONFIG_DEFAULTS=$defaultsValue" build
 if ($LASTEXITCODE -ne 0) {
     throw "Production build failed with exit code $LASTEXITCODE"
 }
@@ -73,7 +74,7 @@ if (-not $SkipPreflight) {
     & python (Join-Path $projectRoot "tools/security/production_preflight.py") `
         --project $projectRoot `
         --build-dir $BuildDir `
-        --sdkconfig $Sdkconfig `
+        --sdkconfig $sdkconfigForBuild `
         --unlock-key $UnlockKey `
         --secure-boot-key $SecureBootKey
     if ($LASTEXITCODE -ne 0) {
