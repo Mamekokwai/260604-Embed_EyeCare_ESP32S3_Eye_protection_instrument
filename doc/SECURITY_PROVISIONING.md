@@ -105,3 +105,16 @@ python tools/security/production_preflight.py \
 ## 运维风险
 
 Secure Boot、Release Flash Encryption、eFuse 和失败锁定均不可逆或难以恢复。必须保管至少两份离线密钥备份、签名公钥指纹、每台设备授权审计记录和生产镜像哈希；不要把私钥、token、`sdkconfig.production` 或未加密生产媒体提交到 Git。
+
+## Windows 可执行构建
+
+在已加载 ESP-IDF 5.4.4 环境的 PowerShell 中运行：
+
+```powershell
+.\tools\security\build_production.ps1
+```
+
+脚本默认从当前用户的 `.ssh` 目录读取项目命名的 ECDSA 授权私钥和 RSA-3072
+Secure Boot 私钥，在独立的 `build-production` 目录生成生产镜像并运行只读预检。
+脚本不会执行 `flash`，也不会写入 eFuse；预检通过后仍须由产线人员在专用芯片上
+人工审核并执行烧录流程。

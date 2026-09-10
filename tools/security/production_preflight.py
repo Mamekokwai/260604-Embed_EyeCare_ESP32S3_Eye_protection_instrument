@@ -114,9 +114,15 @@ def check_partitions(path: Path) -> None:
 def load_keys(
     unlock_key_path: Path, secure_boot_key_path: Path
 ) -> tuple[ec.EllipticCurvePrivateKey, rsa.RSAPrivateKey]:
-    unlock_key = serialization.load_ssh_private_key(
-        unlock_key_path.read_bytes(), password=None
-    )
+    unlock_data = unlock_key_path.read_bytes()
+    try:
+        unlock_key = serialization.load_pem_private_key(unlock_data, password=None)
+    except ValueError:
+        try:
+            unlock_key = serialization.load_ssh_private_key(unlock_data, password=None)
+        except (ValueError, TypeError) as exc:
+            fail("unlock key is not an unencrypted PKCS#8 or OpenSSH key")
+            raise AssertionError from exc
     if not isinstance(unlock_key, ec.EllipticCurvePrivateKey) or not isinstance(
         unlock_key.curve, ec.SECP256R1
     ):
@@ -148,6 +154,14 @@ def check_embedded_public_key(
 
 def check_ignored(project: Path, paths: list[Path]) -> None:
     for path in paths:
+        try:
+            path.relative_to(project)
+        except ValueError:
+            # Keys stored outside the repository (for example in the
+            # operator's .ssh directory) cannot be committed to this Git
+            # worktree, so a Git ignore rule is not required.
+            passed(f"private key is external to repository: {path}")
+            continue
         result = subprocess.run(
             ["git", "check-ignore", "--quiet", str(path)],
             cwd=project,
@@ -211,13 +225,31 @@ def main() -> None:
     parser.add_argument("--project", type=Path, default=default_project)
     parser.add_argument("--build-dir", type=Path, default=Path("build-production-check"))
     parser.add_argument("--sdkconfig", type=Path, default=Path("sdkconfig.production"))
+    parser.add_argument(
+        "--unlock-key",
+        type=Path,
+        help="external ECDSA P-256 unlock private key (default: info/HTML/key/...)",
+    )
+    parser.add_argument(
+        "--secure-boot-key",
+        type=Path,
+        help="external RSA-3072 Secure Boot private key (default: info/HTML/key/...)",
+    )
     args = parser.parse_args()
 
     project = args.project.resolve()
     build = (project / args.build_dir).resolve()
     sdkconfig = (project / args.sdkconfig).resolve()
-    unlock_key_path = project / "info/HTML/key/eyecare_unlock_ecdsa_p256"
-    secure_boot_key_path = project / "info/HTML/key/secure_boot_signing_key.pem"
+    unlock_key_path = (
+        args.unlock_key.resolve()
+        if args.unlock_key
+        else project / "info/HTML/key/eyecare_unlock_ecdsa_p256"
+    )
+    secure_boot_key_path = (
+        args.secure_boot_key.resolve()
+        if args.secure_boot_key
+        else project / "info/HTML/key/secure_boot_signing_key.pem"
+    )
     partition_table = build / "partition_table/partition-table.bin"
     app = build / "template-app.bin"
     bootloader = build / "bootloader/bootloader.bin"
