@@ -50,6 +50,9 @@ python tools/security/unlock_token.py export-public \
   --output main/include/unlock_public_key.h
 ```
 
+脚本生成的私钥为未加密 PKCS#8 PEM（`BEGIN PRIVATE KEY`），可直接导入
+`Two-factor_authentication` GUI；签发工具同时兼容历史 OpenSSH 私钥格式。
+
 从设备读取 `READ_ID` 和 `CHALLENGE` 后，为单台设备签发：
 
 ```bash
