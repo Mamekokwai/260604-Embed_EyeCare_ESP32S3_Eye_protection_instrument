@@ -30,16 +30,38 @@ SIGNATURE_MAX = 72
 
 
 def load_p256_private(path: Path) -> ec.EllipticCurvePrivateKey:
-    key = serialization.load_ssh_private_key(path.read_bytes(), password=None)
+    data = path.read_bytes()
+    # The GUI imports PKCS#8 PEM (BEGIN PRIVATE KEY), while older factory
+    # scripts generated OpenSSH PEM.  Accept both so a provisioning key can
+    # be shared by the offline CLI and Two-factor_authentication without
+    # converting it manually.
+    try:
+        key = serialization.load_pem_private_key(data, password=None)
+    except ValueError:
+        try:
+            key = serialization.load_ssh_private_key(data, password=None)
+        except (ValueError, TypeError) as exc:
+            raise SystemExit(
+                "unlock signing requires an unencrypted PKCS#8 or OpenSSH P-256 key"
+            ) from exc
     if not isinstance(key, ec.EllipticCurvePrivateKey) or not isinstance(
         key.curve, ec.SECP256R1
     ):
-        raise SystemExit("unlock signing requires an ECDSA P-256 OpenSSH key")
+        raise SystemExit("unlock signing requires an ECDSA P-256 key")
     return key
 
 
 def load_p256_public(path: Path) -> ec.EllipticCurvePublicKey:
-    key = serialization.load_ssh_public_key(path.read_bytes())
+    data = path.read_bytes()
+    try:
+        key = serialization.load_ssh_public_key(data)
+    except ValueError:
+        try:
+            key = serialization.load_pem_public_key(data)
+        except ValueError as exc:
+            raise SystemExit(
+                "unlock verification requires an SSH or PEM P-256 public key"
+            ) from exc
     if not isinstance(key, ec.EllipticCurvePublicKey) or not isinstance(
         key.curve, ec.SECP256R1
     ):
@@ -83,9 +105,12 @@ def generate_key(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     key = ec.generate_private_key(ec.SECP256R1())
     path.write_bytes(
+        # PKCS#8 is accepted by WebCrypto and is the interchange format used
+        # by the Two-factor_authentication GUI.  The loader above keeps
+        # backward compatibility with existing OpenSSH factory keys.
         key.private_bytes(
             serialization.Encoding.PEM,
-            serialization.PrivateFormat.OpenSSH,
+            serialization.PrivateFormat.PKCS8,
             serialization.NoEncryption(),
         )
     )
