@@ -84,11 +84,14 @@ CONFIG_NVS_ENCRYPTION=y
 
 ```bash
 idf.py -B build-production \
-  -D SDKCONFIG=sdkconfig.production \
+  -D SDKCONFIG=build-production/sdkconfig.production \
   -D 'SDKCONFIG_DEFAULTS=sdkconfig.defaults;sdkconfig.production.defaults' build
 python tools/security/production_preflight.py \
-  --build-dir build-production --sdkconfig sdkconfig.production
+  --build-dir build-production --sdkconfig build-production/sdkconfig.production
 ```
+
+Windows 推荐直接运行 `tools/security/build_production.ps1`，它会额外生成包含
+外部签名密钥路径的本地 Kconfig 覆盖并自动执行同一套预检。
 
 每台设备的推荐顺序：记录 MAC → 烧录签名生产镜像和媒体 → 首次启动读取 `READ_ID` → 发送 `CHALLENGE` → 离线签发设备绑定 token → 发送 `ACTIVATE` → 读取并记录 `ATC_OK` 与 eFuse 回读 → 断电重启验证无需 TF 卡即可运行。任何 eFuse 写入前必须确认工单、芯片 MAC、序列号和签发记录完全一致。
 
