@@ -19,9 +19,8 @@ param(
 $ErrorActionPreference = "Stop"
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $buildPath = Join-Path $projectRoot $BuildDir
-$sdkconfigPath = Join-Path $projectRoot $Sdkconfig
 $localDefaults = Join-Path $buildPath "sdkconfig.production.local.defaults"
-$sdkconfigForBuild = Join-Path $buildPath "sdkconfig.production"
+$sdkconfigForBuild = Join-Path $buildPath ([IO.Path]::GetFileName($Sdkconfig))
 Set-Location -LiteralPath $projectRoot
 
 if (-not (Test-Path -LiteralPath $UnlockKey -PathType Leaf)) {
