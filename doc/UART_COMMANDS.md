@@ -179,7 +179,7 @@ CA51F 使用已有的 `IMG`、`VID`、`APLAY` 指令组合，不需要 ESP32 新
 | 睫状肌近视远视 | `img/睫状肌训练.jpg` | `video/睫状肌近视远视训练.avi` | `music/vocal/近视.mp3` | `music/1.mp3` |
 | 脉冲档位 1～10 | `img/脉冲训练N.jpg` | 无 | `music/vocal/脉冲按摩.mp3` | `music/1.mp3` |
 
-四个视频模式的时序是 `IMG` → 约 1 秒 → `VID` → vocal；CA51 根据资源实测的约 2.74～2.95 秒 vocal 时长，再发送 `APLAY music/1.mp3`。ESP32 端仍按现有 APLAY 规则自动轮播，多文件按 `ALIST` 顺序循环、单文件循环；ESP32 不提供音频完成通知，因此替换 vocal 文件后应由 CA51 重新核对等待时间。脉冲模式只使用 `IMG` 档位图并保留 EMS，由 CA51 负责。
+四个视频模式的时序是 `IMG` → 约 1 秒 → `VID` → vocal；CA51 根据资源实测的约 2.74～2.95 秒 vocal 时长，先发送现有 `ASTOP` 停止自动轮播，再发送 `APLAY music/1.mp3`。ESP32 端仍按现有 APLAY 规则自动轮播，多文件按 `ALIST` 顺序循环、单文件循环；ESP32 不提供音频完成通知，因此替换 vocal 文件后应由 CA51 重新核对等待时间。脉冲模式只使用 `IMG` 档位图并保留 EMS，由 CA51 负责。
 
 ## 背光指令
 
