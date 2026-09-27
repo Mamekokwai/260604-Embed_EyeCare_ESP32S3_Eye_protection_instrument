@@ -10,7 +10,6 @@
     "IDF_TARGET": "esp32s3"
   },
   "idf.currentSetup": "C:\\Users\\ZeroThrax\\.espressif\\v5.4.4\\esp-idf",
-  "idf.portWin": "COM17",
   "workbench.colorCustomizations": {
     "activityBar.background": "#221717",
     "titleBar.activeBackground": "#221717",
@@ -188,5 +187,6 @@
     "scrollbarSlider.activeBackground": "#EDABABA0",
     "titleBar.inactiveBackground": "#0A0707"
   },
-  "mamecolour.baseColor": "#221717"
+  "mamecolour.baseColor": "#221717",
+  "idf.port": "COM17"
 }
