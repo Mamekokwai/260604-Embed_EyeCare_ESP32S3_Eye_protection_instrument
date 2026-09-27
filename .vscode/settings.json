@@ -10,6 +10,8 @@
     "IDF_TARGET": "esp32s3"
   },
   "idf.currentSetup": "C:\\Users\\ZeroThrax\\.espressif\\v5.4.4\\esp-idf",
+  "cmake.configureOnOpen": false,
+  "cmake.buildBeforeRun": false,
   "workbench.colorCustomizations": {
     "activityBar.background": "#221717",
     "titleBar.activeBackground": "#221717",
