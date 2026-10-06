@@ -8,7 +8,7 @@
  *
  * 指令: VLIST / VPLAY / FIMGLIST / FIMG
  *       VIDLIST / VID / VPAUSE / VRESUME / VSTOP
- *       APLAY / ALIST / ASTOP / AMUTE / VOL / BL / SDLIST / IMGLIST / IMG
+ *       APLAY / ALIST / ASTOP / AMUTE / VOL / BL / BLOFF / BLON / SDLIST / IMGLIST / IMG
  *       ENC / RST / STATUS / INFO / SLEEP / WAKE
  */
 
@@ -59,6 +59,8 @@ static char g_usb_line[UART_LINE_SIZE];
 static int g_usb_pos = 0;
 static bool s_usb_input_ready;
 static uint8_t s_sleep_backlight = 100;
+static uint8_t s_temporary_backlight_restore = 100;
+static bool s_temporary_backlight_off;
 /* CA51->JTAG 转发默认开启；通过 JTAG 的 CA51FWD ON/OFF 临时切换。 */
 static bool s_ca51_forward_enabled = true;
 typedef struct
@@ -464,6 +466,8 @@ static bool sleep_command_allowed(const char *cmd)
            strcasecmp(cmd, "BL-") == 0 ||
            strcasecmp(cmd, "BL++") == 0 ||
            strcasecmp(cmd, "BL--") == 0 ||
+           strcasecmp(cmd, "BLOFF") == 0 ||
+           strcasecmp(cmd, "BLON") == 0 ||
            strcasecmp(cmd, "CA51FWD") == 0 ||
            strcasecmp(cmd, "CA51FWD?") == 0 ||
            strncasecmp(cmd, "CA51FWD ", 8) == 0 ||
@@ -526,6 +530,35 @@ static void cmd_handle(const char *cmd)
 
     ESP_LOGI(TAG, "%s CMD: [%s]",
              s_cmd_source == CMD_SOURCE_UART1 ? "UART1" : "JTAG", cmd);
+
+    /* 临时背光控制只改变 PWM，不能覆盖 NVS 中保存的亮度。 */
+    if (strcasecmp(cmd, "BLOFF") == 0)
+    {
+        if (!s_temporary_backlight_off)
+        {
+            s_temporary_backlight_restore =
+                g_display_mode == DISPLAY_SLEEP
+                    ? s_sleep_backlight
+                    : spilcd_backlight_get();
+            s_temporary_backlight_off = true;
+        }
+        spilcd_backlight_set(0);
+        uart_send_str("OK BLOFF");
+        return;
+    }
+    if (strcasecmp(cmd, "BLON") == 0)
+    {
+        if (s_temporary_backlight_off)
+        {
+            if (g_display_mode == DISPLAY_SLEEP)
+                s_sleep_backlight = s_temporary_backlight_restore;
+            else
+                spilcd_backlight_set(s_temporary_backlight_restore);
+            s_temporary_backlight_off = false;
+        }
+        uart_send_str("OK BLON");
+        return;
+    }
 
     /* === 当前链路的响应文本编码 === */
     if (strcasecmp(cmd, "ENC") == 0 || strcasecmp(cmd, "ENC?") == 0)
