@@ -30,3 +30,6 @@ void app_uart_inject(const char *cmd); /* 注入指令, 模拟 CA51 发送 */
 
 /* SD 卡异常时切换到 Flash 中的 SDCard.jpg；返回是否已开始异步显示。 */
 bool app_uart_start_sd_error_image(void);
+
+/* 图片显示完成或失败后，提交临时背光恢复。 */
+void app_uart_image_display_complete(void);
