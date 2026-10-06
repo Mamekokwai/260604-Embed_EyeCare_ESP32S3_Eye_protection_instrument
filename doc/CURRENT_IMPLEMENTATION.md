@@ -37,9 +37,9 @@ SD 视频只使用 AVI `SecPerFrame` 做帧率控制，并以 LCD DMA 完成事�
 | 中文字库 | ① 内嵌 `gbk_embedded_font.h`（解密提示等无卡后续流程），② TF 卡 `/SYSTEM/FONT/GBK16.FON`（完整 GBK16 字库，SDLIST 任意中文文件名）。无 SD 卡启动画面使用 Flash 中的 `SDCard.jpg`，不依赖字库。FATFS 用 CODEPAGE_936 + ANSI/OEM，`d_name` 返回 GBK 双字节 |
 | 主循环 | 正常模式为 1 ms tick、5 个 cooperative workspace，视频每 1 ms 快速服务；`SLEEP` 时停止 tick，仅每 20 ms 轮询 UART1/JTAG 命令，`WAKE` 后恢复调度 |
 | Flash 视频 | AVI/MJPEG，mmap `storage`，兼容媒体索引 v1/v2，PSRAM 双帧，2×40 行内部 SRAM DMA 条带 |
-| TF 视频 | MJPEG AVI ≤320×320，32 KiB 流读取，PSRAM 双帧，1×160 行 DMA 条带 |
+| TF 视频 | MJPEG AVI ≤320×320，16 KiB 流读取，PSRAM 双帧，1×160 行 DMA 条带 |
 | 图片 | Baseline JPEG ≤1 MiB、≤320×320，32 KiB 分块读，1×80 行 DMA 条带 |
-| 音频 | TF `.pcm/.mp3`，CPU1 独立 5 ms 服务，ES8311 固定输出链路；`APLAY` 按 `ALIST` 递归索引自动轮播，单曲时循环，`ASTOP` 关闭轮播 |
+| 音频 | TF `.pcm/.mp3`，CPU1 独立供数任务；I2S DMA 扩大为 12×480 帧，服务任务仅在无数据时延迟 1 ms；每 2 s 输出最大供数间隔统计；`APLAY` 按 `ALIST` 递归索引自动轮播，单曲时循环，`ASTOP` 关闭轮播 |
 | TF 目录 | `VIDLIST`、`IMGLIST`、`ALIST` 递归扫描；索引是 FAT 遍历顺序；内部使用 GBK 中文相对路径（FATFS CODEPAGE_936）；JTAG 默认 UTF-8 输入在 `IMG`/`VID`/`APLAY` 前转换为 GBK，UART1 默认按 GBK 接收；UART 输出可选 GBK/UTF-8 |
 | 屏幕目录 | `SDLIST` 只浏览根目录，这是独立 UI 功能 |
 

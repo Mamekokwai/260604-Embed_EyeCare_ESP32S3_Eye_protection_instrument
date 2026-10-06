@@ -41,7 +41,7 @@ flowchart LR
 | 链路 | 输入 | 缓冲与 DMA | 调度 |
 |---|---|---|---|
 | Flash `VPLAY` | `storage` FAT 索引，mmap AVI/MJPEG | PSRAM 双帧；2 个内部 SRAM 40 行条带 | CPU0 解码，1 ms 服务 |
-| TF `VID` | 递归解析相对路径，32 KiB FatFS 流读取 | PSRAM 双帧；1 个内部 SRAM 160 行条带 | CPU0 解码，1 ms 服务 |
+| TF `VID` | 递归解析相对路径，16 KiB FatFS 流读取 | PSRAM 双帧；1 个内部 SRAM 160 行条带 | CPU0 解码，1 ms 服务 |
 
 两条链路均解析 RIFF/AVI、只显示 MJPEG 图像，并跳过 AVI 音频块。TF 视频尺寸不得超过 320×320。PSRAM 帧不能直接提交 LCD DMA，必须同步 cache 后复制到内部 SRAM 条带。
 
