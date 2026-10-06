@@ -33,7 +33,7 @@ SD 视频只使用 AVI `SecPerFrame` 做帧率控制，并以 LCD DMA 完成事�
 | 项目 | 当前实现 |
 |---|---|
 | 启动门与热插拔 | `app_main` 先 `spilcd_init` 再 `boot_gate()`：TF 卡座无 CD 检测脚，首次挂载前等待 300 ms，每次挂载最多重试 3 次（间隔 100 ms）；无 SD 卡时显示 Flash 中的 `SDCard.jpg`（不依赖字库）并重试。运行中每 2 s 用 CMD13 探测卡状态，拔卡时先停止 SD 视频/音频并卸载文件系统，重新插卡后自动重挂载；已挂载且在线时不会重复卸载挂载。`IMG` 执行前和读取失败后均复核 SD 状态，确认无卡时统一切换到 Flash `SDCard.jpg`，不显示 `IMAGE ERROR` 字体页。加密开启且未解锁显示`请解密`并尝试解锁，通过后进入正常启动。启动门通过后自动分片显示 Flash `start.jpg`，不再自动播放 Flash 视频；启动图缺失时显示 `READY / NO START IMAGE`。 |
-| 用户设置 | NVS 命名空间 `eyecare` 保存 `volume`、`backlight` 两个 5~100 参数；启动最前面读取，音频初始化后应用音量，LCD 初始化后延迟 1 s 应用背光；`VOL`/`BL` 设置成功后立即提交 NVS，掉电后恢复。支持 `VOL±`/`BL±` 步进 1，以及 `VOL±±`/`BL±±` 步进 10，边界自动钳位到各自宏定义的 5~100。 |
+| 用户设置 | NVS 命名空间 `eyecare` 保存 `volume`、`backlight` 两个 5~100 参数；启动最前面读取，音频初始化后应用音量，LCD 初始化后延迟 1 s 应用背光；`VOL`/`BL` 设置成功后立即提交 NVS，掉电后恢复。支持 `VOL±`/`BL±` 步进 1，以及 `VOL±±`/`BL±±` 步进 10，边界自动钳位到各自宏定义的 5~100；`BLOFF`/`BLON` 仅临时关闭/恢复背光，不写入 NVS。 |
 | 中文字库 | ① 内嵌 `gbk_embedded_font.h`（解密提示等无卡后续流程），② TF 卡 `/SYSTEM/FONT/GBK16.FON`（完整 GBK16 字库，SDLIST 任意中文文件名）。无 SD 卡启动画面使用 Flash 中的 `SDCard.jpg`，不依赖字库。FATFS 用 CODEPAGE_936 + ANSI/OEM，`d_name` 返回 GBK 双字节 |
 | 主循环 | 正常模式为 1 ms tick、5 个 cooperative workspace，视频每 1 ms 快速服务；`SLEEP` 时停止 tick，仅每 20 ms 轮询 UART1/JTAG 命令，`WAKE` 后恢复调度 |
 | Flash 视频 | AVI/MJPEG，mmap `storage`，兼容媒体索引 v1/v2，PSRAM 双帧，2×40 行内部 SRAM DMA 条带 |
@@ -43,7 +43,7 @@ SD 视频只使用 AVI `SecPerFrame` 做帧率控制，并以 LCD DMA 完成事�
 | TF 目录 | `VIDLIST`、`IMGLIST`、`ALIST` 递归扫描；索引是 FAT 遍历顺序；内部使用 GBK 中文相对路径（FATFS CODEPAGE_936）；JTAG 默认 UTF-8 输入在 `IMG`/`VID`/`APLAY` 前转换为 GBK，UART1 默认按 GBK 接收；UART 输出可选 GBK/UTF-8 |
 | 屏幕目录 | `SDLIST` 只浏览根目录，这是独立 UI 功能 |
 
-CA51F 当前训练媒体只调用已有的 `IMG`、`VID`、`APLAY`、`ASTOP` 指令：弱视、散光、斜视和睫状肌近视远视各使用一张提示图与一个 AVI，脉冲训练使用 `img/脉冲训练1.jpg`～`10.jpg`；CA51 先发送对应 vocal，按资源实测时长等待后发送 `ASTOP`，再发送 `APLAY music/1.mp3`。视频源 MP4 必须在制作 SD 卡前转换为 ESP32 可播放的 AVI/MJPEG。此资源映射不要求修改 ESP32 命令解析器或 APLAY 自动轮播实现。
+CA51F 当前训练媒体调用 `IMG`、`VID`、`APLAY`、`ASTOP` 以及脉冲模式的临时 `BLOFF`/`BLON` 指令：弱视、散光、斜视和睫状肌近视远视各使用一张提示图与一个 AVI，脉冲训练使用 `img/脉冲训练1.jpg`～`10.jpg`；CA51 先发送对应 vocal，按资源实测时长等待后发送 `ASTOP`，再发送 `APLAY music/1.mp3`，脉冲模式空闲约 5 秒后关闭背光、按键后恢复。视频源 MP4 必须在制作 SD 卡前转换为 ESP32 可播放的 AVI/MJPEG。此资源映射不要求修改 APLAY 自动轮播实现。
 
 ## Flash 分区
 
