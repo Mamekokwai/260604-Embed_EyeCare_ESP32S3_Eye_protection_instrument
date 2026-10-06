@@ -43,7 +43,7 @@ SD 视频只使用 AVI `SecPerFrame` 做帧率控制，并以 LCD DMA 完成事�
 | TF 目录 | `VIDLIST`、`IMGLIST`、`ALIST` 递归扫描；索引是 FAT 遍历顺序；内部使用 GBK 中文相对路径（FATFS CODEPAGE_936）；JTAG 默认 UTF-8 输入在 `IMG`/`VID`/`APLAY` 前转换为 GBK，UART1 默认按 GBK 接收；UART 输出可选 GBK/UTF-8 |
 | 屏幕目录 | `SDLIST` 只浏览根目录，这是独立 UI 功能 |
 
-CA51F 当前训练媒体调用 `IMG`、`VID`、`APLAY`、`ASTOP` 以及脉冲模式的临时 `BLOFF`/`BLON` 指令：弱视、散光、斜视和睫状肌近视远视各使用一张提示图与一个 AVI，脉冲训练使用 `img/脉冲训练1.jpg`～`10.jpg`；CA51 先发送对应 vocal，按资源实测时长等待后发送 `ASTOP`，再发送 `APLAY music/1.mp3`，脉冲模式空闲约 5 秒后关闭背光、按键后恢复。视频源 MP4 必须在制作 SD 卡前转换为 ESP32 可播放的 AVI/MJPEG。此资源映射不要求修改 APLAY 自动轮播实现。
+CA51F 当前训练媒体调用 `IMG`、`VID`、`APLAY`、`ASTOP` 以及脉冲模式的临时 `BLOFF`/`BLON` 指令：弱视、散光、斜视和睫状肌近视远视各使用一张提示图与一个 AVI，脉冲训练使用 `img/脉冲训练1.jpg`～`10.jpg`；CA51 先发送对应 vocal，按资源实测时长等待后发送 `ASTOP`，再发送 `APLAY music/1.mp3`，脉冲模式空闲约 5 秒后关闭背光、按键后请求恢复。ESP32 在 IMG/FIMG 完成或失败后才实际恢复临时背光，因此切图和息屏关机画面不会在刷新中途亮起。视频源 MP4 必须在制作 SD 卡前转换为 ESP32 可播放的 AVI/MJPEG。此资源映射不要求修改 APLAY 自动轮播实现。
 
 ## Flash 分区
 
