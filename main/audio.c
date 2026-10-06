@@ -133,8 +133,9 @@ static esp_err_t init_i2s_channels(void)
     i2s_chan_config_t chan_cfg = {
         .id = I2S_NUM_0,
         .role = I2S_ROLE_MASTER,
-        .dma_desc_num = 6,
-        .dma_frame_num = 240,
+        /* Larger DMA headroom absorbs short SD/FatFS scheduling stalls. */
+        .dma_desc_num = 12,
+        .dma_frame_num = 480,
         .auto_clear_after_cb = true,
         .auto_clear_before_cb = false,
         .intr_priority = 0,

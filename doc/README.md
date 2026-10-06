@@ -7,7 +7,7 @@
 - 显示：双 JD9855 共用 8-bit i80 数据总线，RGB565；视频与图片共用 LCD，互斥运行。
 - Flash 媒体：`storage` FAT 分区保存 AVI/MJPEG 和 JPEG；Flash 视频跳过 AVI 音频块。
 - TF 媒体：SDMMC 1-bit 40 MHz，递归扫描全部子目录；支持 MJPEG AVI、PCM/MP3、Baseline JPEG。无 CD 检测脚时每 2 s 探测卡状态，拔卡自动停止 SD 播放并卸载，重新插卡后自动挂载；`IMG` 遇到拔卡/无卡时统一显示 Flash `SDCard.jpg`。
-- 调度：CPU0 使用 1 ms tick 和 5 个 workspace；视频每 1 ms 服务，图片分阶段处理；音频在 CPU1 独立任务中每 5 ms 服务。
+- 调度：CPU0 使用 1 ms tick 和 5 个 workspace；视频每 1 ms 服务，图片分阶段处理；音频在 CPU1 独立供数任务中连续运行，仅无数据时延迟 1 ms，并每 2 s 输出供数间隔统计。
 - 用户设置：音量和背光亮度保存到 NVS，重启后恢复；LCD 背光启动时先关闭，读取配置后延迟 1 s 开启。
 - 音量/背光支持 `VOL+`、`VOL-`（步进 1）及 `VOL++`、`VOL--`（步进 10），背光对应 `BL+`、`BL-`、`BL++`、`BL--`；两者均限制在 5~100，边界可通过独立宏调整。
 - `APLAY <N/filename>` 从指定音频开始按 `ALIST` 的递归索引顺序自动轮播；多首播完回到第一首，只有一首时循环该曲，`ASTOP` 会停止轮播。

@@ -28,6 +28,8 @@
 #define AUDIO_TASK_STACK_SIZE 6144
 #define AUDIO_TASK_PRIORITY   5
 #define AUDIO_TASK_CORE       1
+#define AUDIO_GAP_WARN_US     40000
+#define AUDIO_PROFILE_PERIOD_US 2000000
 
 typedef enum {
     AUDIO_FMT_PCM,
@@ -58,6 +60,10 @@ typedef struct {
 static ap_ctx_t g_ap = { .volume = 70, .loop = true };
 static SemaphoreHandle_t g_audio_mutex;
 static TaskHandle_t g_audio_task;
+static int64_t s_last_audio_progress_us;
+static int64_t s_max_audio_gap_us;
+static uint32_t s_audio_gap_events;
+static int64_t s_audio_profile_started_us;
 
 /* APLAY 启动后按媒体目录的递归索引顺序自动轮播。索引只在命令启动时
  * 建立，播放过程中不保存整张目录，避免额外占用大量内存。 */
@@ -66,6 +72,45 @@ static int s_playlist_count;
 static int s_playlist_index;
 
 static void audio_player_stop_locked(void);
+
+static void audio_profile_reset(void)
+{
+    s_last_audio_progress_us = 0;
+    s_max_audio_gap_us = 0;
+    s_audio_gap_events = 0;
+    s_audio_profile_started_us = 0;
+}
+
+static void audio_profile_note_progress(void)
+{
+    int64_t now = esp_timer_get_time();
+    if (s_last_audio_progress_us != 0) {
+        int64_t gap = now - s_last_audio_progress_us;
+        if (gap > s_max_audio_gap_us)
+            s_max_audio_gap_us = gap;
+        if (gap > AUDIO_GAP_WARN_US)
+            s_audio_gap_events++;
+    }
+    s_last_audio_progress_us = now;
+    if (s_audio_profile_started_us == 0)
+        s_audio_profile_started_us = now;
+}
+
+static void audio_profile_log_if_due(void)
+{
+    int64_t now = esp_timer_get_time();
+    if (s_audio_profile_started_us == 0 ||
+        now - s_audio_profile_started_us < AUDIO_PROFILE_PERIOD_US)
+        return;
+
+    ESP_LOGI(TAG, "supply: max_gap=%lld ms gaps>%dms=%lu",
+             (long long)(s_max_audio_gap_us / 1000),
+             AUDIO_GAP_WARN_US / 1000,
+             (unsigned long)s_audio_gap_events);
+    s_max_audio_gap_us = 0;
+    s_audio_gap_events = 0;
+    s_audio_profile_started_us = now;
+}
 
 static bool parse_audio_index(const char *selection, int *index)
 {
@@ -107,6 +152,7 @@ static esp_err_t audio_player_init_locked(const char *filename)
     if (g_ap.initialized)
         audio_player_stop_locked();
     memset(&g_ap, 0, sizeof(g_ap));
+    audio_profile_reset();
     g_ap.volume = volume;
     g_ap.muted   = muted;
     g_ap.loop    = true;
@@ -256,6 +302,7 @@ static player_ret_t audio_player_tick_locked(void)
                                     mp3_decoder_channels(g_ap.decoder)) != ESP_OK) {
                     return PLAYER_ERROR;
                 }
+                audio_profile_note_progress();
                 g_ap.chunks_done++;
                 return PLAYER_OK;
             }
@@ -297,6 +344,7 @@ static player_ret_t audio_player_tick_locked(void)
                         16000, 1) != ESP_OK)
         return PLAYER_ERROR;
 
+    audio_profile_note_progress();
     g_ap.pos += br;
     g_ap.chunks_done++;
 
@@ -332,15 +380,25 @@ static void audio_service_task(void *arg)
     while (1)
     {
         bool active = false;
+        player_ret_t result = PLAYER_BUSY;
         audio_lock();
         active = g_ap.initialized;
-        if (active && audio_player_tick_locked() == PLAYER_ERROR)
+        if (active) {
+            result = audio_player_tick_locked();
+            audio_profile_log_if_due();
+        }
+        if (active && result == PLAYER_ERROR)
         {
             ESP_LOGE(TAG, "Audio service playback error");
             audio_player_stop_locked();
         }
         audio_unlock();
-        vTaskDelay(pdMS_TO_TICKS(active ? 5 : 50));
+        if (!active)
+            vTaskDelay(pdMS_TO_TICKS(50));
+        else if (result == PLAYER_BUSY)
+            vTaskDelay(pdMS_TO_TICKS(1));
+        else
+            taskYIELD();
     }
 }
 

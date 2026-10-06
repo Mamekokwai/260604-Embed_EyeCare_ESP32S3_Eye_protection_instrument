@@ -37,7 +37,7 @@
 
 #define TAG "video_player"
 
-#define DMA_BUF_SIZE (32 * 1024)
+#define DMA_BUF_SIZE (16 * 1024)
 #define FRAME_BUF_SIZE (320 * 320 * sizeof(uint16_t))
 #define MAX_JPEG_SIZE (96 * 1024)
 #define VP_STRIP_H 160 // 写入条带高度

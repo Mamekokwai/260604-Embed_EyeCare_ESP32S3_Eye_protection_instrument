@@ -5317,7 +5317,7 @@
           <h3>音频链路 (TF → 喇叭)</h3>
         </div>
         <ul>
-          <li>&bull; CPU1 独立音频服务任务, 5ms tick, 递归互斥锁保护</li>
+          <li>&bull; CPU1 独立音频供数任务, 无固定 5ms 等待, 递归互斥锁保护; 每 2s 输出供数间隔统计</li>
           <li>&bull; PCM 直接分块 (2KB); MP3 经 helix 软解为 PCM</li>
           <li>&bull; audio_write_pcm 线性重采样到 44.1kHz 单声道后写 I2S0</li>
           <li>&bull; GPIO2 高电平使能功放, AMUTE / 停止时拉低</li>
