@@ -548,14 +548,8 @@ static void cmd_handle(const char *cmd)
     }
     if (strcasecmp(cmd, "BLON") == 0)
     {
-        if (s_temporary_backlight_off)
-        {
-            if (g_display_mode == DISPLAY_SLEEP)
-                s_sleep_backlight = s_temporary_backlight_restore;
-            else
-                spilcd_backlight_set(s_temporary_backlight_restore);
-            s_temporary_backlight_off = false;
-        }
+        /* When temporarily off, the next completed IMG/FIMG restores it;
+         * this command can arrive before that image is queued. */
         uart_send_str("OK BLON");
         return;
     }
@@ -1306,6 +1300,18 @@ bool app_uart_start_sd_error_image(void)
     }
     g_display_mode = DISPLAY_IMAGE_LOADING;
     return true;
+}
+
+void app_uart_image_display_complete(void)
+{
+    if (!s_temporary_backlight_off)
+        return;
+
+    if (g_display_mode == DISPLAY_SLEEP)
+        s_sleep_backlight = s_temporary_backlight_restore;
+    else
+        spilcd_backlight_set(s_temporary_backlight_restore);
+    s_temporary_backlight_off = false;
 }
 
 /* ---- 单字符指令解析 ---- */

@@ -112,6 +112,7 @@ static void display_tick(void)
         image_viewer_state_t image_state = image_viewer_tick();
         if (image_state == IMAGE_VIEWER_DONE)
         {
+            app_uart_image_display_complete();
             char response[192];
             snprintf(response, sizeof(response), "OK %s %s %lux%lu",
                      image_viewer_command(),
@@ -136,6 +137,7 @@ static void display_tick(void)
                 app_uart_send("OK FIMG loading");
                 break;
             }
+            app_uart_image_display_complete();
             char response[64];
             snprintf(response, sizeof(response), "ERR %s %s",
                      image_viewer_command(),
