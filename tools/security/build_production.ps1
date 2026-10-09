@@ -13,6 +13,7 @@ param(
     [string]$Sdkconfig = "sdkconfig.production",
     [string]$UnlockKey = (Join-Path $env:USERPROFILE ".ssh\260604-Embed_EyeCare_ESP32S3_320x320"),
     [string]$SecureBootKey = (Join-Path $env:USERPROFILE ".ssh\260604-Embed_EyeCare_ESP32S3_320x320_secure_boot_rsa3072.pem"),
+    [switch]$Clean,
     [switch]$SkipPreflight
 )
 
@@ -28,6 +29,14 @@ if (-not (Test-Path -LiteralPath $UnlockKey -PathType Leaf)) {
 }
 if (-not (Test-Path -LiteralPath $SecureBootKey -PathType Leaf)) {
     throw "Secure Boot RSA private key not found: $SecureBootKey"
+}
+
+if ($Clean -and (Test-Path -LiteralPath $buildPath -PathType Container)) {
+    Write-Host "Cleaning production build directory: $buildPath"
+    & idf.py -B $BuildDir fullclean
+    if ($LASTEXITCODE -ne 0) {
+        throw "Production build cleanup failed with exit code $LASTEXITCODE"
+    }
 }
 
 New-Item -ItemType Directory -Path $buildPath -Force | Out-Null
