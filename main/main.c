@@ -348,17 +348,17 @@ void app_main(void)
 
     app_uart_init();
 
-    /* 上电自动显示 Flash 启动图片；图片加载由主循环分片完成，
-     * 不在 app_main 中阻塞等待 LCD DMA。 */
-    esp_err_t auto_start_ret = image_viewer_start_flash("start.jpg");
+    /* 上电自动显示 SD 卡启动图片；图片加载由主循环分片完成，
+     * 不在 app_main 中阻塞等待 LCD DMA。启动门已确认 SD 在线。 */
+    esp_err_t auto_start_ret = image_viewer_start("img/start.jpg");
     if (auto_start_ret == ESP_OK)
     {
         g_display_mode = DISPLAY_IMAGE_LOADING;
-        ESP_LOGI(TAG, "Auto FIMG start.jpg OK");
+        ESP_LOGI(TAG, "Auto IMG img/start.jpg OK");
     }
     else
     {
-        ESP_LOGW(TAG, "Auto FIMG start.jpg unavailable: %s",
+        ESP_LOGW(TAG, "Auto IMG img/start.jpg unavailable: %s",
                  esp_err_to_name(auto_start_ret));
         spilcd_clear(WHITE);
         spilcd_show_text16(112, 136, "READY", BLUE, WHITE);
