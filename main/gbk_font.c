@@ -179,16 +179,23 @@ void gbk_show_boot_text(uint16_t x, uint16_t y, uint16_t color)
     gbk_show_font(x, y, ka, color);
 }
 
-/* "请解密": 请,解,密 */
-void gbk_show_unlock_text(uint16_t x, uint16_t y, uint16_t color)
+/* "未进行生产测试": 未,进,行,生,产,测,试 */
+void gbk_show_production_test_text(uint16_t x, uint16_t y, uint16_t color)
 {
     spilcd_clear(WHITE);
-    uint8_t qing[2] = {0xC7, 0xEB};
-    gbk_show_font(x, y, qing, color);
-    x += 16;
-    uint8_t jie[2] = {0xBD, 0xE2};
-    gbk_show_font(x, y, jie, color);
-    x += 16;
-    uint8_t mi[2] = {0xC3, 0xDC};
-    gbk_show_font(x, y, mi, color);
+    static const uint8_t text[][2] = {
+        {0xCE, 0xB4}, /* 未 */
+        {0xBD, 0xF8}, /* 进 */
+        {0xD0, 0xD0}, /* 行 */
+        {0xC9, 0xFA}, /* 生 */
+        {0xB2, 0xFA}, /* 产 */
+        {0xB2, 0xE2}, /* 测 */
+        {0xCA, 0xD4}, /* 试 */
+    };
+
+    for (size_t i = 0; i < sizeof(text) / sizeof(text[0]); i++)
+    {
+        gbk_show_font(x, y, text[i], color);
+        x += 16;
+    }
 }

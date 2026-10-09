@@ -245,7 +245,7 @@ static void boot_gate(void)
         if (!esp_efuse_read_field_bit(ESP_EFUSE_USER_DATA_EYECARE_UNLOCKED))
         {
             ESP_LOGW(TAG, "Device locked; waiting for USB authorization");
-            gbk_show_unlock_text(120, 150, BLACK);
+            gbk_show_production_test_text(104, 150, BLACK);
             if (!production_unlock_ensure())
             {
                 vTaskDelay(pdMS_TO_TICKS(500));
@@ -273,7 +273,7 @@ static void boot_gate(void)
         if (!esp_efuse_read_field_bit(ESP_EFUSE_USER_DATA_EYECARE_UNLOCKED))
         {
             ESP_LOGW(TAG, "Device locked; waiting for unlock token");
-            gbk_show_unlock_text(120, 150, BLACK); /* 白底黑字: 请解密 */
+            gbk_show_production_test_text(104, 150, BLACK); /* 白底黑字: 未进行生产测试 */
             if (production_unlock_ensure())
             {
                 spilcd_clear(WHITE);
