@@ -190,5 +190,7 @@
     "titleBar.inactiveBackground": "#0A0707"
   },
   "mamecolour.baseColor": "#221717",
-  "idf.port": "COM17"
+  "idf.portWin": "COM17",
+  "idf.port": "COM17",
+  "idf.enableSerialPortChipIdRequest": false
 }
