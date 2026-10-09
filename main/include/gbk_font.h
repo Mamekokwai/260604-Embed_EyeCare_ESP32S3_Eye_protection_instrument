@@ -25,8 +25,8 @@
 /** "请插入SD卡" 里的汉字: 请插[入SD]卡 → 请,插,入,卡 */
 void gbk_show_boot_text(uint16_t x, uint16_t y, uint16_t color);
 
-/** "请解密" 提示 */
-void gbk_show_unlock_text(uint16_t x, uint16_t y, uint16_t color);
+/** "未进行生产测试" 提示 */
+void gbk_show_production_test_text(uint16_t x, uint16_t y, uint16_t color);
 
 /* ---- TF 卡字库 (任意中文文件名) ---- */
 
