@@ -91,9 +91,10 @@ python tools/security/production_preflight.py \
 ```
 
 Windows 推荐直接运行 `tools/security/build_production.ps1`，它会额外生成包含
-外部签名密钥路径的本地 Kconfig 覆盖并自动执行同一套预检。
+外部签名密钥路径的本地 Kconfig 覆盖、在 `build-production/storage.bin` 中打包
+生产无卡提示图 `SDCard.jpg`，并自动执行同一套预检。
 
-每台设备的推荐顺序：记录 MAC → 烧录签名生产镜像和媒体 → 首次启动读取 `READ_ID` → 发送 `CHALLENGE` → 离线签发设备绑定 token → 发送 `ACTIVATE` → 读取并记录 `ATC_OK` 与 eFuse 回读 → 断电重启验证无需 TF 卡即可运行。任何 eFuse 写入前必须确认工单、芯片 MAC、序列号和签发记录完全一致。
+每台设备的推荐顺序：记录 MAC → 使用生产烧录脚本一次写入签名生产镜像和带 `SDCard.jpg` 的 `storage` 分区 → 首次启动读取 `READ_ID` → 发送 `CHALLENGE` → 离线签发设备绑定 token → 发送 `ACTIVATE` → 读取并记录 `ATC_OK` 与 eFuse 回读 → 断电重启验证无需 TF 卡即可运行。任何 eFuse 写入前必须确认工单、芯片 MAC、序列号和签发记录完全一致。该 storage 镜像必须在首次启用 Flash Encryption 前写入；已完成安全锁定的设备不能用明文媒体镜像更新。
 
 ## 必测安全场景
 
@@ -120,4 +121,4 @@ Secure Boot、Release Flash Encryption、eFuse 和失败锁定均不可逆或难
 脚本默认从当前用户的 `.ssh` 目录读取项目命名的 ECDSA 授权私钥和 RSA-3072
 Secure Boot 私钥，在独立的 `build-production` 目录生成生产镜像并运行只读预检。
 脚本不会执行 `flash`，也不会写入 eFuse；预检通过后仍须由产线人员在专用芯片上
-人工审核并执行烧录流程。
+人工审核并执行烧录流程。生产烧录脚本会同时写入 `storage.bin`，其中包含无卡提示图。

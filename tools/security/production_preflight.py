@@ -43,6 +43,8 @@ EXPECTED_PARTITIONS = {
 PARTITION_ENTRY = struct.Struct("<HBBII16sI")
 PARTITION_MAGIC = 0x50AA
 PARTITION_FLAG_ENCRYPTED = 1
+MEDIA_HEADER = struct.Struct("<4sHHHHI")
+MEDIA_ENTRY = struct.Struct("<BBHIII48s")
 PRIVATE_MARKERS = (
     b"OPENSSH PRIVATE KEY",
     b"BEGIN PRIVATE KEY",
@@ -109,6 +111,34 @@ def check_partitions(path: Path) -> None:
                 f"partition {name}: actual={actual.get(name)}, expected={expected}"
             )
     passed("production partition offsets and encryption flags")
+
+
+def check_storage_media(path: Path) -> None:
+    data = path.read_bytes()
+    if len(data) < 4096:
+        fail(f"production storage image is too small: {path}")
+    magic, version, count, entry_size, _reserved, index_size = MEDIA_HEADER.unpack(
+        data[: MEDIA_HEADER.size]
+    )
+    if magic != b"FMD1" or version != 2 or entry_size != MEDIA_ENTRY.size:
+        fail("production storage image has an invalid Flash media header")
+    if index_size != 4096 or count == 0 or count > 63:
+        fail("production storage image has an invalid media index")
+    names: set[str] = set()
+    for index in range(count):
+        start = MEDIA_HEADER.size + index * MEDIA_ENTRY.size
+        end = start + MEDIA_ENTRY.size
+        if end <= len(data):
+            entry = MEDIA_ENTRY.unpack(data[start:end])
+        else:
+            fail("production storage media index is truncated")
+        name = entry[-1].split(b"\0", 1)[0].decode("utf-8", errors="strict")
+        names.add(name.casefold())
+    if "sdcard.jpg" not in names:
+        fail("production storage image does not contain SDCard.jpg")
+    if len(data) > EXPECTED_PARTITIONS["storage"][1]:
+        fail("production storage image exceeds the storage partition")
+    passed("production storage image contains SDCard.jpg")
 
 
 def load_keys(
@@ -253,12 +283,14 @@ def main() -> None:
     partition_table = build / "partition_table/partition-table.bin"
     app = build / "template-app.bin"
     bootloader = build / "bootloader/bootloader.bin"
+    storage = build / "storage.bin"
 
     required_files = [
         sdkconfig,
         partition_table,
         app,
         bootloader,
+        storage,
         unlock_key_path,
         secure_boot_key_path,
         project / "main/include/unlock_public_key.h",
@@ -269,6 +301,7 @@ def main() -> None:
 
     check_config(sdkconfig)
     check_partitions(partition_table)
+    check_storage_media(storage)
     unlock_key, _secure_boot_key = load_keys(
         unlock_key_path, secure_boot_key_path
     )
