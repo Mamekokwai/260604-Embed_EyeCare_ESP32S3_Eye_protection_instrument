@@ -11,7 +11,7 @@
 - 用户设置：音量和背光亮度保存到 NVS，重启后恢复；LCD 背光启动时先关闭，读取配置后延迟 1 s 开启。
 - 音量/背光支持 `VOL+`、`VOL-`（步进 1）及 `VOL++`、`VOL--`（步进 10），背光对应 `BL+`、`BL-`、`BL++`、`BL--`；`BLOFF`/`BLON` 可临时关闭/恢复背光且不改 NVS；两者均限制在 5~100，边界可通过独立宏调整。
 - `APLAY <N/filename>` 从指定音频开始按 `ALIST` 的递归索引顺序自动轮播；多首播完回到第一首，只有一首时循环该曲，`ASTOP` 会停止轮播。
-- DMA：媒体帧保存在 PSRAM，提交 LCD 前复制到内部 SRAM 条带。Flash 视频条带为 40 行×2，TF 视频为 160 行×1，图片为 80 行×1。
+- DMA：媒体帧保存在 PSRAM，提交 LCD 前复制到内部 SRAM 条带。Flash 视频条带为 40 行×2，TF 视频为 80 行×1，图片为 80 行×1。
 - 中文显示：FATFS CODEPAGE_936（GBK）；无 SD 卡启动画面使用 Flash 中的 `SDCard.jpg`，不依赖字库；SDLIST 中文文件名走 TF 卡 `/SYSTEM/FONT/GBK16.FON`。
 - JTAG 文件名输入默认 UTF-8，固件在 `IMG`、`VID`、`APLAY` 执行前转换为 FATFS 所需的 GBK；UART1 默认按 GBK 接收。
 - UART 中文响应：UART1 默认 GBK 以兼容 CA51，USB Serial-JTAG 默认 UTF-8；两路可分别用 `ENC UTF8`、`ENC GBK` 配置，用 `ENC?` 查询。
