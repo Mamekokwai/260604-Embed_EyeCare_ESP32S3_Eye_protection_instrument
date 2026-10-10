@@ -12,6 +12,7 @@
   "idf.currentSetup": "C:\\Users\\ZeroThrax\\.espressif\\v5.4.4\\esp-idf",
   "cmake.configureOnOpen": false,
   "cmake.buildBeforeRun": false,
+  "extensions.ignoreRecommendations": true,
   "workbench.colorCustomizations": {
     "activityBar.background": "#221717",
     "titleBar.activeBackground": "#221717",
