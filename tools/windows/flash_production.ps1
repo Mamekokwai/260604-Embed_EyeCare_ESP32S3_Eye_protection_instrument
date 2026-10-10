@@ -3,8 +3,9 @@
     Flash the complete EyeCare production image.
 
 .DESCRIPTION
-    Write bootloader, partition table, and application in one operation.
-    This script does not run idf.py flash, write eFuse, or flash the storage partition.
+    Write bootloader, partition table, application, and the production fallback
+    image in the storage partition in one operation.
+    This script does not run idf.py flash or write eFuse.
 #>
 [CmdletBinding()]
 param(
@@ -53,6 +54,7 @@ $sdkconfigPath = Join-Path $buildPath "sdkconfig.production"
 $bootloader = Join-Path $buildPath "bootloader\bootloader.bin"
 $partitionTable = Join-Path $buildPath "partition_table\partition-table.bin"
 $application = Join-Path $buildPath "template-app.bin"
+$storageImage = Join-Path $buildPath "storage.bin"
 $preflight = Join-Path $projectDir "tools\security\production_preflight.py"
 $idfPython = Join-Path $env:USERPROFILE ".espressif\python_env\idf5.4_py3.12_env\Scripts\python.exe"
 $idfExport = Join-Path $env:USERPROFILE ".espressif\v5.4.4\esp-idf\export.ps1"
@@ -67,7 +69,7 @@ if (-not (Test-Path -LiteralPath $idfPython -PathType Leaf)) {
     throw "ESP-IDF Python environment not found: $idfPython"
 }
 
-foreach ($required in @($sdkconfigPath, $bootloader, $partitionTable, $application, $preflight)) {
+foreach ($required in @($sdkconfigPath, $bootloader, $partitionTable, $application, $storageImage, $preflight)) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
         throw "Production artifact missing. Run tools\windows\build_production.ps1 first: $required"
     }
@@ -109,8 +111,9 @@ Write-Host "  $Port @ $Baud baud"
 Write-Host "  0x000000  $bootloader"
 Write-Host "  0x010000  $partitionTable"
 Write-Host "  0x020000  $application"
+Write-Host "  0x120000  $storageImage (SDCard.jpg fallback)"
 Write-Host ""
-Write-Host "The production bootloader and signed application will be written; eFuse will not be changed." -ForegroundColor Yellow
+Write-Host "The signed firmware and SDCard.jpg storage payload will be written; eFuse will not be changed." -ForegroundColor Yellow
 
 if (-not $ConfirmProductionFlash) {
     $answer = Read-Host 'Type FLASH-PRODUCTION to continue, or press Enter to cancel'
@@ -145,7 +148,8 @@ Write-Host "[2/2] Flashing complete production image..."
     --flash_size keep `
     0x000000 $bootloader `
     0x010000 $partitionTable `
-    0x020000 $application
+    0x020000 $application `
+    0x120000 $storageImage
 
 if ($LASTEXITCODE -ne 0) {
     throw "Production image flash failed, exit=$LASTEXITCODE"

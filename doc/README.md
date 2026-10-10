@@ -77,7 +77,9 @@ idf.py -B build-production \
 
 生产镜像首次启动会执行不可逆的安全 eFuse 操作。先阅读生产指南，并只在备用板上走通全流程；不要直接在开发板执行生产 `flash`。
 
-生产构建完成后可运行 `python tools/security/production_preflight.py --build-dir build-production` 做只读预检。
+生产构建完成后会在 `build-production/storage.bin` 中包含 Flash 无卡提示图
+`SDCard.jpg`；可运行 `python tools/security/production_preflight.py --build-dir build-production`
+做只读预检。生产烧录脚本会将该 storage 镜像与固件一并写入。
 
 ## 关键引脚
 

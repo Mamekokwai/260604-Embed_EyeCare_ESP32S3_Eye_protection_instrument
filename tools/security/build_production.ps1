@@ -22,6 +22,9 @@ $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $buildPath = Join-Path $projectRoot $BuildDir
 $localDefaults = Join-Path $buildPath "sdkconfig.production.local.defaults"
 $sdkconfigForBuild = Join-Path $buildPath ([IO.Path]::GetFileName($Sdkconfig))
+$mediaPacker = Join-Path $projectRoot "tools\linux\flash_media_pack.py"
+$storageImage = Join-Path $buildPath "storage.bin"
+$sdCardImage = Join-Path $projectRoot "Public\flash\SDCard.jpg"
 Set-Location -LiteralPath $projectRoot
 
 if (-not (Test-Path -LiteralPath $UnlockKey -PathType Leaf)) {
@@ -77,8 +80,21 @@ if ($LASTEXITCODE -ne 0) {
     throw "Production build failed with exit code $LASTEXITCODE"
 }
 
+if (-not (Test-Path -LiteralPath $mediaPacker -PathType Leaf)) {
+    throw "Flash media packer not found: $mediaPacker"
+}
+if (-not (Test-Path -LiteralPath $sdCardImage -PathType Leaf)) {
+    throw "Production fallback image not found: $sdCardImage"
+}
+
+Write-Host "[2/3] Building storage media payload for encrypted partition: $storageImage"
+& python $mediaPacker $storageImage $sdCardImage --max-size 14680064
+if ($LASTEXITCODE -ne 0) {
+    throw "Production storage media build failed with exit code $LASTEXITCODE"
+}
+
 if (-not $SkipPreflight) {
-    Write-Host "[2/2] Running read-only production preflight"
+    Write-Host "[3/3] Running read-only production preflight"
     & python (Join-Path $projectRoot "tools/security/production_preflight.py") `
         --project $projectRoot `
         --build-dir $BuildDir `
