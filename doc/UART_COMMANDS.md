@@ -160,14 +160,14 @@ USB Serial-JTAG 默认输入编码为 UTF-8，UART1 默认输入编码为 GBK；
 | 指令 | 说明 | 成功响应 |
 | --- | --- | --- |
 | `ALIST` | 列出 `.pcm` 和 `.mp3` 文件 | `ALIST` 后跟列表 |
-| `APLAY <N/filename>` | 从指定音频开始自动轮播；按 `ALIST` 的递归索引顺序播放，多首播完回到第一首，只有一首时循环该曲 | `OK APLAY` |
+| `APLAY <N/filename>` | 播放指定音频并自动循环当前曲目；将 `main/audio_player.c` 中的 `AUDIO_AUTO_PLAYLIST_ENABLE` 改为 `1` 可恢复按 `ALIST` 顺序轮播 | `OK APLAY` |
 | `ASTOP` | 停止音频 | `OK ASTOP` |
 | `AMUTE` | 切换静音 | `OK AMUTE on/off` |
 | `VOL <5-100>` | 设置音量并掉电保存 | `OK VOL <value>` |
 | `VOL+` / `VOL-` | 音量增加/减少 1 | `OK VOL <value>` |
 | `VOL++` / `VOL--` | 音量增加/减少 10 | `OK VOL <value>` |
 
-音频状态与显示状态独立：`APLAY` 不会停止视频或取消图片加载，`VPLAY`、`IMG`、`SDLIST` 也不会停止音频。`APLAY` 开启自动轮播，文件顺序与 `ALIST` 相同；`ASTOP` 或重新初始化其他音频路径会关闭轮播。视频和图片共用 LCD，因此二者仍互斥。音频运行于 CPU1 独立任务，显示调度运行于 CPU0；各媒体独立播放，不做音画时间轴同步。`SLEEP` 会停止显示和音频，并暂停 1 ms 主调度 tick，进入低频 UART/JTAG 命令轮询。
+音频状态与显示状态独立：`APLAY` 不会停止视频或取消图片加载，`VPLAY`、`IMG`、`SDLIST` 也不会停止音频。当前 `APLAY` 默认循环当前指定曲目，不自动切换目录中的其他文件；将 `AUDIO_AUTO_PLAYLIST_ENABLE` 改为 `1` 可恢复原有自动轮播，`ASTOP` 停止音频。视频和图片共用 LCD，因此二者仍互斥。音频运行于 CPU1 独立任务，显示调度运行于 CPU0；各媒体独立播放，不做音画时间轴同步。`SLEEP` 会停止显示和音频，并暂停 1 ms 主调度 tick，进入低频 UART/JTAG 命令轮询。
 
 ### CA51F 眼保仪训练资源
 
@@ -181,7 +181,7 @@ CA51F 使用已有的 `IMG`、`VID`、`APLAY` 指令组合，不需要 ESP32 新
 | 睫状肌近视远视 | `img/睫状肌训练.jpg` | `video/睫状肌近视远视训练.avi` | `music/vocal/近视.mp3` | `music/1.mp3` |
 | 脉冲档位 1～10 | `img/脉冲训练N.jpg` | 无 | `music/vocal/脉冲按摩.mp3` | `music/1.mp3` |
 
-四个视频模式的时序是 `IMG` → 约 1 秒 → `VID` → vocal；CA51 根据资源实测的约 2.74～2.95 秒 vocal 时长，先发送现有 `ASTOP` 停止自动轮播，再发送 `APLAY music/1.mp3`。ESP32 端仍按现有 APLAY 规则自动轮播，多文件按 `ALIST` 顺序循环、单文件循环；ESP32 不提供音频完成通知，因此替换 vocal 文件后应由 CA51 重新核对等待时间。脉冲模式只使用 `IMG` 档位图并保留 EMS，由 CA51 负责。
+四个视频模式的时序是 `IMG` → 约 1 秒 → `VID` → vocal；CA51 根据资源实测的约 2.74～2.95 秒 vocal 时长，先发送现有 `ASTOP`，再发送 `APLAY music/1.mp3`。ESP32 默认只循环当前 vocal 或背景音乐，不切换到目录中的其他音频；ESP32 不提供音频完成通知，因此替换 vocal 文件后应由 CA51 重新核对等待时间。脉冲模式只使用 `IMG` 档位图并保留 EMS，由 CA51 负责。
 
 ## 背光指令
 
