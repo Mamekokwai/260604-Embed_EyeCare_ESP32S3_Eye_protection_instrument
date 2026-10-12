@@ -1,5 +1,7 @@
 # ESP32-S3 眼保仪固件
 
+目标模组：`ESP32-S3-WROOM-1U-N16R8`（ESP32-S3，16 MiB Flash、8 MiB Octal PSRAM，外置天线版本）。
+
 项目文档已统一收录在 [`doc/`](doc/)：
 
 - [项目说明与构建指南](doc/README.md)
