@@ -6,7 +6,7 @@
 
 | 子系统 | 当前实现 | 代码依据 |
 |---|---|---|
-| MCU/存储 | ESP32-S3-WROOM-1，16 MiB Flash，8 MiB Octal PSRAM | `sdkconfig.defaults`、板级资料 |
+| MCU/存储 | ESP32-S3-WROOM-1U-N16R8，16 MiB Flash，8 MiB Octal PSRAM，外置天线版本 | `sdkconfig.defaults`、板级资料 |
 | LCD | 两块 JD9855 320×320，8-bit i80，共享 DB0–DB7/WR/D-C，CS1=17、CS2=18 | `components/BSP/SPILCD/` |
 | LCD 引脚 | DB0–7=6–13、WR=46、D/C=38、RESET=3；无 TE（V1.4 无 TE 引脚） | `components/BSP/SPILCD/` |
 | 背光 | V1.4：GPIO1=PWM_LED，LEDC PWM（1 kHz/8bit）→ Q3 → LEDK；启动时先关闭，读取 NVS 后延迟 1 s 按保存值开启，`spilcd_backlight_set()` 调光 | `components/BSP/SPILCD/spilcd.c`、`main/app_settings.c` |

@@ -1,6 +1,6 @@
 # ESP32-S3 眼保仪固件
 
-本项目是 YT06 主板（V1.4 为当前硬件）的 ESP-IDF v5.4.4 固件，目标芯片为 ESP32-S3-WROOM-1（16 MiB Flash、8 MiB Octal PSRAM）。设备驱动两块 320×320 JD9855 圆屏、ES8311 音频、TF 卡，并通过 CA51F352P4 发来的 UART 指令控制。
+本项目是 YT06 主板（V1.4 为当前硬件）的 ESP-IDF v5.4.4 固件，目标模组为 ESP32-S3-WROOM-1U-N16R8（ESP32-S3，16 MiB Flash、8 MiB Octal PSRAM，外置天线版本）。设备驱动两块 320×320 JD9855 圆屏、ES8311 音频、TF 卡，并通过 CA51F352P4 发来的 UART 指令控制。
 
 ## 当前实现
 

@@ -192,6 +192,6 @@
   },
   "mamecolour.baseColor": "#221717",
   "idf.portWin": "COM17",
-  "idf.port": "COM28",
+  "idf.port": "COM16",
   "idf.enableSerialPortChipIdRequest": false
 }

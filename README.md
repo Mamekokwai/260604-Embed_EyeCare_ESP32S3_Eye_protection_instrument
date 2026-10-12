@@ -8,6 +8,8 @@
 
 生产固件的 Secure Boot、Release Flash Encryption、NVS 加密和二次授权配置只从 `product` 分支制作。修改生产分支前应先确认需求、密钥和 eFuse 操作计划。
 
+目标模组：`ESP32-S3-WROOM-1U-N16R8`（ESP32-S3，16 MiB Flash、8 MiB Octal PSRAM，外置天线版本）。
+
 项目文档已统一收录在 [`doc/`](doc/)：
 
 - [项目说明与构建指南](doc/README.md)

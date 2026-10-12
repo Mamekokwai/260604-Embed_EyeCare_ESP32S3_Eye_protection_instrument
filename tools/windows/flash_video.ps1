@@ -1,4 +1,4 @@
-<#
+﻿<#
   Windows Flash 媒体烧录工具 (Flash storage 分区)
   等价于 tools/linux/flash_video.sh
   步骤: 收集媒体文件 -> 解析 storage 偏移 -> 打包 -> esptool 烧录
@@ -16,6 +16,12 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# Python tools emit UTF-8; align both PowerShell and the native console before
+# forwarding their output so Chinese diagnostics are not decoded as GBK.
+$utf8Encoding = New-Object System.Text.UTF8Encoding($false)
+[Console]::OutputEncoding = $utf8Encoding
+$OutputEncoding = $utf8Encoding
 
 # --- 路径 ---
 $scriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
