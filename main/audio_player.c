@@ -71,6 +71,9 @@ static bool s_playlist_enabled;
 static int s_playlist_count;
 static int s_playlist_index;
 
+/* 默认锁定当前曲目循环；保留目录轮播代码，联调时可改为 1 恢复。 */
+#define AUDIO_AUTO_PLAYLIST_ENABLE 0
+
 static void audio_player_stop_locked(void);
 
 static void audio_profile_reset(void)
@@ -481,7 +484,8 @@ esp_err_t audio_player_start(const char *selection)
     s_playlist_count = 0;
     s_playlist_index = 0;
     ret = audio_player_init_locked(path);
-    if (ret == ESP_OK && playlist_count > 0 && playlist_index > 0) {
+    if (AUDIO_AUTO_PLAYLIST_ENABLE && ret == ESP_OK &&
+        playlist_count > 0 && playlist_index > 0) {
         s_playlist_enabled = true;
         s_playlist_count = playlist_count;
         s_playlist_index = playlist_index;
