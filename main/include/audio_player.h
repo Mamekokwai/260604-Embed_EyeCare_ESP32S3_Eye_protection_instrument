@@ -31,6 +31,11 @@ esp_err_t audio_player_init(const char *filename);
 esp_err_t audio_player_start(const char *selection);
 
 /**
+ * @brief 按递归目录序号或 SD 相对路径播放一次，结束后停止
+ */
+esp_err_t audio_player_start_once(const char *selection);
+
+/**
  * @brief  推进播放 (每次 tick 读一块数据 → I2S)
  */
 player_ret_t audio_player_tick(void);

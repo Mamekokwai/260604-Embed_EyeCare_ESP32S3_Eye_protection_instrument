@@ -8,7 +8,7 @@
  *
  * 指令: VLIST / VPLAY / FIMGLIST / FIMG
  *       VIDLIST / VID / VPAUSE / VRESUME / VSTOP
- *       APLAY / ALIST / ASTOP / AMUTE / VOL / BL / BLOFF / BLON / SDLIST / IMGLIST / IMG
+ *       APLAY / APLAYONCE / ALIST / ASTOP / AMUTE / VOL / BL / BLOFF / BLON / SDLIST / IMGLIST / IMG
  *       ENC / RST / STATUS / INFO / SLEEP / WAKE
  */
 
@@ -945,6 +945,33 @@ static void cmd_handle(const char *cmd)
     if (strcasecmp(cmd, "APLAY") == 0)
     {
         uart_send_str("ERR usage: APLAY <n> or APLAY <filename>");
+        return;
+    }
+    if (strcasecmp(cmd, "APLAYONCE") == 0)
+    {
+        uart_send_str("ERR usage: APLAYONCE <n> or APLAYONCE <filename>");
+        return;
+    }
+    if (strncasecmp(cmd, "APLAYONCE ", sizeof("APLAYONCE ") - 1) == 0)
+    {
+        const char *arg = cmd + (sizeof("APLAYONCE ") - 1);
+        char arg_gbk[UART_LINE_SIZE];
+        while (*arg == ' ')
+            arg++;
+
+        if (!audio_is_ready())
+        {
+            uart_send_str("ERR audio codec not ready");
+        }
+        else if (audio_player_start_once(
+                     media_argument_gbk(arg, arg_gbk, sizeof(arg_gbk))) == ESP_OK)
+        {
+            uart_send_str("OK APLAYONCE");
+        }
+        else
+        {
+            uart_send_str("ERR cannot open file (SD card?)");
+        }
         return;
     }
     if (strncasecmp(cmd, "APLAY ", 6) == 0)

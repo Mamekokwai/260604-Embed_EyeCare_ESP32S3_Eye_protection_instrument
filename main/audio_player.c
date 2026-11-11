@@ -30,6 +30,7 @@
 #define AUDIO_TASK_CORE       1
 #define AUDIO_GAP_WARN_US     40000
 #define AUDIO_PROFILE_PERIOD_US 2000000
+#define AUDIO_DRAIN_DELAY_US  150000
 
 typedef enum {
     AUDIO_FMT_PCM,
@@ -55,6 +56,8 @@ typedef struct {
     int16_t *mp3_pcm;
     size_t input_pos;
     size_t input_len;
+    bool drain_pending;
+    int64_t drain_deadline_us;
 } ap_ctx_t;
 
 static ap_ctx_t g_ap = { .volume = 70, .loop = true };
@@ -143,7 +146,7 @@ static void audio_unlock(void)
 
 /* ====== 公开 API ====== */
 
-static esp_err_t audio_player_init_locked(const char *filename)
+static esp_err_t audio_player_init_locked(const char *filename, bool loop)
 {
     if (!audio_is_ready()) {
         ESP_LOGE(TAG, "ES8311 is not ready");
@@ -158,7 +161,7 @@ static esp_err_t audio_player_init_locked(const char *filename)
     audio_profile_reset();
     g_ap.volume = volume;
     g_ap.muted   = muted;
-    g_ap.loop    = true;
+    g_ap.loop    = loop;
 
     /* 构建 FatFS 路径 */
     char fatfs_path[MEDIA_CATALOG_PATH_MAX + 4];
@@ -227,7 +230,7 @@ static bool audio_player_open_next_locked(void)
             char path[MEDIA_CATALOG_PATH_MAX + 4];
             int written = snprintf(path, sizeof(path), "0:/%s", name);
             if (written > 0 && written < (int)sizeof(path) &&
-                audio_player_init_locked(path) == ESP_OK) {
+                audio_player_init_locked(path, true) == ESP_OK) {
                 s_playlist_index = next;
                 ESP_LOGI(TAG, "Playlist next: %s", name);
                 return true;
@@ -259,7 +262,20 @@ static player_ret_t audio_player_tick_locked(void)
                     if (audio_player_open_next_locked())
                         continue;
                     if (!g_ap.loop) {
-                        audio_player_stop_locked();
+                        int64_t elapsed = esp_timer_get_time() - g_ap.start_time;
+                        if (g_ap.file.obj.fs) f_close(&g_ap.file);
+                        mp3_decoder_destroy(g_ap.decoder);
+                        free(g_ap.mp3_input);
+                        free(g_ap.mp3_pcm);
+                        g_ap.decoder = NULL;
+                        g_ap.mp3_input = NULL;
+                        g_ap.mp3_pcm = NULL;
+                        g_ap.initialized = false;
+                        g_ap.drain_pending = true;
+                        g_ap.drain_deadline_us = esp_timer_get_time() +
+                                                 AUDIO_DRAIN_DELAY_US;
+                        ESP_LOGI(TAG, "Finished once: %lu chunks in %lld ms",
+                                 g_ap.chunks_done, elapsed / 1000);
                         return PLAYER_OK;
                     }
                     f_lseek(&g_ap.file, 0);
@@ -324,7 +340,14 @@ static player_ret_t audio_player_tick_locked(void)
             g_ap.chunks_done = 0;
             ESP_LOGI(TAG, "Loop restart");
         } else {
-            audio_player_stop_locked();
+            int64_t elapsed = esp_timer_get_time() - g_ap.start_time;
+            if (g_ap.file.obj.fs) f_close(&g_ap.file);
+            g_ap.initialized = false;
+            g_ap.drain_pending = true;
+            g_ap.drain_deadline_us = esp_timer_get_time() +
+                                     AUDIO_DRAIN_DELAY_US;
+            ESP_LOGI(TAG, "Finished once: %lu chunks in %lld ms",
+                     g_ap.chunks_done, elapsed / 1000);
             return PLAYER_OK;
         }
     }
@@ -356,6 +379,7 @@ static player_ret_t audio_player_tick_locked(void)
 
 static void audio_player_stop_locked(void)
 {
+    g_ap.drain_pending = false;
     esp_err_t amp_ret = audio_amp_set_enabled(false);
     if (amp_ret != ESP_OK && amp_ret != ESP_ERR_INVALID_STATE)
         ESP_LOGE(TAG, "Cannot mute amplifier: %s",
@@ -394,6 +418,10 @@ static void audio_service_task(void *arg)
         {
             ESP_LOGE(TAG, "Audio service playback error");
             audio_player_stop_locked();
+        }
+        if (g_ap.drain_pending && esp_timer_get_time() >= g_ap.drain_deadline_us) {
+            g_ap.drain_pending = false;
+            audio_amp_set_enabled(false);
         }
         audio_unlock();
         if (!active)
@@ -436,7 +464,29 @@ esp_err_t audio_player_init(const char *filename)
     s_playlist_enabled = false;
     s_playlist_count = 0;
     s_playlist_index = 0;
-    esp_err_t ret = audio_player_init_locked(filename);
+    esp_err_t ret = audio_player_init_locked(filename, true);
+    audio_unlock();
+    return ret;
+}
+
+esp_err_t audio_player_start_once(const char *selection)
+{
+    char name[MEDIA_CATALOG_PATH_MAX];
+    esp_err_t ret = media_catalog_resolve(
+        MEDIA_AUDIO, selection, name, sizeof(name));
+    if (ret != ESP_OK)
+        return ret;
+
+    char path[MEDIA_CATALOG_PATH_MAX + 4];
+    int written = snprintf(path, sizeof(path), "0:/%s", name);
+    if (written <= 0 || written >= (int)sizeof(path))
+        return ESP_ERR_INVALID_SIZE;
+
+    audio_lock();
+    s_playlist_enabled = false;
+    s_playlist_count = 0;
+    s_playlist_index = 0;
+    ret = audio_player_init_locked(path, false);
     audio_unlock();
     return ret;
 }
@@ -483,7 +533,7 @@ esp_err_t audio_player_start(const char *selection)
     s_playlist_enabled = false;
     s_playlist_count = 0;
     s_playlist_index = 0;
-    ret = audio_player_init_locked(path);
+    ret = audio_player_init_locked(path, true);
     if (AUDIO_AUTO_PLAYLIST_ENABLE && ret == ESP_OK &&
         playlist_count > 0 && playlist_index > 0) {
         s_playlist_enabled = true;

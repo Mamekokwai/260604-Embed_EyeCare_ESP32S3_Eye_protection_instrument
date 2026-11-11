@@ -161,6 +161,7 @@ USB Serial-JTAG 默认输入编码为 UTF-8，UART1 默认输入编码为 GBK；
 | --- | --- | --- |
 | `ALIST` | 列出 `.pcm` 和 `.mp3` 文件 | `ALIST` 后跟列表 |
 | `APLAY <N/filename>` | 播放指定音频并自动循环当前曲目；将 `main/audio_player.c` 中的 `AUDIO_AUTO_PLAYLIST_ENABLE` 改为 `1` 可恢复按 `ALIST` 顺序轮播 | `OK APLAY` |
+| `APLAYONCE <N/filename>` | 从头播放指定音频一次，结束后自动停止并关闭功放；会替换当前音频，不发送完成通知 | `OK APLAYONCE` |
 | `ASTOP` | 停止音频 | `OK ASTOP` |
 | `AMUTE` | 切换静音 | `OK AMUTE on/off` |
 | `VOL <5-100>` | 设置音量并掉电保存 | `OK VOL <value>` |
@@ -241,6 +242,7 @@ FIMG 1\n
 IMGLIST\n
 IMG 1\n
 APLAY music.mp3\n
+APLAYONCE music/vocal/关机提示.mp3\n
 STATUS\n
 VSTOP\n
 ASTOP\n
