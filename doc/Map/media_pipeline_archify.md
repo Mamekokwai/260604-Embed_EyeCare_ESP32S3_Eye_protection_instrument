@@ -60,7 +60,7 @@ flowchart LR
 
 ## 音频
 
-`ALIST`/`APLAY` 递归选择 TF 卡 `.pcm/.mp3`。`APLAY` 从指定曲目开始按 `ALIST` 顺序自动轮播，播完回到第一首，单曲时循环。PCM 约定 16-bit、单声道、16 kHz；MP3 由 micro-mp3 解码。CPU1 独立任务将源采样率线性重采样至 ES8311 输出链路，I2S0 使用 MCLK45/BCLK39/WS41/DOUT42，GPIO2 高电平开启功放。
+`ALIST`/`APLAY` 递归选择 TF 卡 `.pcm/.mp3`。`APLAY` 默认循环当前曲目，将 `AUDIO_AUTO_PLAYLIST_ENABLE` 设为 `1` 后才按 `ALIST` 顺序自动轮播；`APLAYONCE` 从头播放指定曲目一次，排空 I2S 尾部后停止。PCM 约定 16-bit、单声道、16 kHz；MP3 由 micro-mp3 解码。CPU1 独立任务将源采样率线性重采样至 ES8311 输出链路，I2S0 使用 MCLK45/BCLK39/WS41/DOUT42，GPIO2 高电平开启功放。
 
 ## 目录规则
 
