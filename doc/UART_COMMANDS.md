@@ -160,7 +160,7 @@ USB Serial-JTAG 默认输入编码为 UTF-8，UART1 默认输入编码为 GBK；
 | 指令 | 说明 | 成功响应 |
 | --- | --- | --- |
 | `ALIST` | 列出 `.pcm` 和 `.mp3` 文件 | `ALIST` 后跟列表 |
-| `APLAY <N/filename>` | 播放指定音频并自动循环当前曲目；将 `main/audio_player.c` 中的 `AUDIO_AUTO_PLAYLIST_ENABLE` 改为 `1` 可恢复按 `ALIST` 顺序轮播 | `OK APLAY` |
+| `APLAY <N/filename>` | 播放指定音频并循环当前曲目；`music/vocal/` 下的路径为兼容旧版 CA51 自动单播一次，`music/1.mp3` 等背景音乐仍循环；将 `AUDIO_AUTO_PLAYLIST_ENABLE` 改为 `1` 可恢复非 vocal 音频按 `ALIST` 顺序轮播 | `OK APLAY` |
 | `APLAYONCE <N/filename>` | 从头播放指定音频一次，结束后自动停止并关闭功放；会替换当前音频，不发送完成通知 | `OK APLAYONCE` |
 | `ASTOP` | 停止音频 | `OK ASTOP` |
 | `AMUTE` | 切换静音 | `OK AMUTE on/off` |
@@ -168,7 +168,7 @@ USB Serial-JTAG 默认输入编码为 UTF-8，UART1 默认输入编码为 GBK；
 | `VOL+` / `VOL-` | 音量增加/减少 1 | `OK VOL <value>` |
 | `VOL++` / `VOL--` | 音量增加/减少 10 | `OK VOL <value>` |
 
-音频状态与显示状态独立：`APLAY` 不会停止视频或取消图片加载，`VPLAY`、`IMG`、`SDLIST` 也不会停止音频。当前 `APLAY` 默认循环当前指定曲目，不自动切换目录中的其他文件；将 `AUDIO_AUTO_PLAYLIST_ENABLE` 改为 `1` 可恢复原有自动轮播，`ASTOP` 停止音频。视频和图片共用 LCD，因此二者仍互斥。音频运行于 CPU1 独立任务，显示调度运行于 CPU0；各媒体独立播放，不做音画时间轴同步。`SLEEP` 会停止显示和音频，并暂停 1 ms 主调度 tick，进入低频 UART/JTAG 命令轮询。
+音频状态与显示状态独立：`APLAY` 不会停止视频或取消图片加载，`VPLAY`、`IMG`、`SDLIST` 也不会停止音频。`APLAY` 对 `music/vocal/` 路径兼容旧版 CA51，单次结束后自动关闭功放；背景音乐路径仍循环当前曲目，将 `AUDIO_AUTO_PLAYLIST_ENABLE` 改为 `1` 可恢复非 vocal 音频按目录轮播，`ASTOP` 停止音频。视频和图片共用 LCD，因此二者仍互斥。音频运行于 CPU1 独立任务，显示调度运行于 CPU0；各媒体独立播放，不做音画时间轴同步。`SLEEP` 会停止显示和音频，并暂停 1 ms 主调度 tick，进入低频 UART/JTAG 命令轮询。
 
 ### CA51F 眼保仪训练资源
 

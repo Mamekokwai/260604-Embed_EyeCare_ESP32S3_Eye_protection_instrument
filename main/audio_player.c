@@ -118,6 +118,7 @@ static void audio_profile_log_if_due(void)
     s_audio_profile_started_us = now;
 }
 
+#if AUDIO_AUTO_PLAYLIST_ENABLE
 static bool parse_audio_index(const char *selection, int *index)
 {
     if (!selection || !selection[0] || !index)
@@ -130,6 +131,14 @@ static bool parse_audio_index(const char *selection, int *index)
 
     *index = (int)value;
     return true;
+}
+#endif
+
+static bool audio_path_is_vocal(const char *name)
+{
+    static const char vocal_prefix[] = "music/vocal/";
+    return name && strncasecmp(name, vocal_prefix,
+                                sizeof(vocal_prefix) - 1) == 0;
 }
 
 static void audio_lock(void)
@@ -499,10 +508,16 @@ esp_err_t audio_player_start(const char *selection)
     if (ret != ESP_OK)
         return ret;
 
-    char list_probe[1];
-    int playlist_count = media_catalog_list(MEDIA_AUDIO, list_probe,
-                                            sizeof(list_probe));
+    /* 旧版 CA51 用 APLAY 播放 vocal；按目录约定兼容为单次播放，
+     * 避免未更新 CA51 时欢迎语或训练提示音无限循环。 */
+    bool vocal_once = audio_path_is_vocal(name);
+    int playlist_count = 0;
     int playlist_index = 0;
+#if AUDIO_AUTO_PLAYLIST_ENABLE
+    char list_probe[1];
+    if (!vocal_once)
+        playlist_count = media_catalog_list(MEDIA_AUDIO, list_probe,
+                                            sizeof(list_probe));
     if (playlist_count > 0) {
         if (parse_audio_index(selection, &playlist_index)) {
             if (playlist_index > playlist_count)
@@ -524,6 +539,7 @@ esp_err_t audio_player_start(const char *selection)
             }
         }
     }
+#endif
 
     char path[MEDIA_CATALOG_PATH_MAX + 4];
     int written = snprintf(path, sizeof(path), "0:/%s", name);
@@ -533,8 +549,8 @@ esp_err_t audio_player_start(const char *selection)
     s_playlist_enabled = false;
     s_playlist_count = 0;
     s_playlist_index = 0;
-    ret = audio_player_init_locked(path, true);
-    if (AUDIO_AUTO_PLAYLIST_ENABLE && ret == ESP_OK &&
+    ret = audio_player_init_locked(path, !vocal_once);
+    if (AUDIO_AUTO_PLAYLIST_ENABLE && !vocal_once && ret == ESP_OK &&
         playlist_count > 0 && playlist_index > 0) {
         s_playlist_enabled = true;
         s_playlist_count = playlist_count;

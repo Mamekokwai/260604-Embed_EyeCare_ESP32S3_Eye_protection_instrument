@@ -10,7 +10,7 @@
 - 调度：CPU0 使用 1 ms tick 和 5 个 workspace；视频每 1 ms 服务，图片分阶段处理；音频在 CPU1 独立供数任务中连续运行，仅无数据时延迟 1 ms，并每 2 s 输出供数间隔统计。
 - 用户设置：音量和背光亮度保存到 NVS，重启后恢复；LCD 背光启动时先关闭，读取配置后延迟 1 s 开启。
 - 音量/背光支持 `VOL+`、`VOL-`（步进 1）及 `VOL++`、`VOL--`（步进 10），背光对应 `BL+`、`BL-`、`BL++`、`BL--`；`BLOFF`/`BLON` 可临时关闭/恢复背光且不改 NVS；两者均限制在 5~100，边界可通过独立宏调整。
-- `APLAY <N/filename>` 默认循环当前曲目；将 `AUDIO_AUTO_PLAYLIST_ENABLE` 设为 `1` 后才按 `ALIST` 递归索引自动轮播，`ASTOP` 会停止播放。
+- `APLAY <N/filename>` 默认循环当前曲目；`music/vocal/` 路径兼容旧版 CA51 自动单播一次，背景音乐仍循环；将 `AUDIO_AUTO_PLAYLIST_ENABLE` 设为 `1` 后非 vocal 音频才按 `ALIST` 递归索引自动轮播，`ASTOP` 会停止播放。
 - `APLAYONCE <N/filename>` 从头播放指定音频一次，结束后停止并关闭功放，适合一次性提示音；不会发送完成通知。
 - DMA：媒体帧保存在 PSRAM，提交 LCD 前复制到内部 SRAM 条带。Flash 视频条带为 40 行×2，TF 视频为 80 行×1，图片为 80 行×1。
 - 中文显示：FATFS CODEPAGE_936（GBK）；无 SD 卡启动画面使用 Flash 中的 `SDCard.jpg`，不依赖字库；SDLIST 中文文件名走 TF 卡 `/SYSTEM/FONT/GBK16.FON`。
