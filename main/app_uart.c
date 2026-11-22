@@ -61,6 +61,7 @@ static bool s_usb_input_ready;
 static uint8_t s_sleep_backlight = 100;
 static uint8_t s_temporary_backlight_restore = 100;
 static bool s_temporary_backlight_off;
+static bool s_video_backlight_restore_requested;
 /* CA51->JTAG 转发默认开启；通过 JTAG 的 CA51FWD ON/OFF 临时切换。 */
 static bool s_ca51_forward_enabled = true;
 typedef struct
@@ -534,6 +535,8 @@ static void cmd_handle(const char *cmd)
     /* 临时背光控制只改变 PWM，不能覆盖 NVS 中保存的亮度。 */
     if (strcasecmp(cmd, "BLOFF") == 0)
     {
+        /* A new explicit off command cancels any pending video restore. */
+        s_video_backlight_restore_requested = false;
         if (!s_temporary_backlight_off)
         {
             s_temporary_backlight_restore =
@@ -548,8 +551,9 @@ static void cmd_handle(const char *cmd)
     }
     if (strcasecmp(cmd, "BLON") == 0)
     {
-        /* When temporarily off, the next completed IMG/FIMG restores it;
-         * this command can arrive before that image is queued. */
+        /* When temporarily off, the next completed IMG/FIMG or video restores it;
+         * this command can arrive before that media is queued. */
+        s_video_backlight_restore_requested = true;
         uart_send_str("OK BLON");
         return;
     }
@@ -1351,6 +1355,9 @@ void app_uart_image_display_complete(void)
 
 void app_uart_video_display_complete(void)
 {
+    if (!s_video_backlight_restore_requested)
+        return;
+    s_video_backlight_restore_requested = false;
     restore_temporary_backlight();
 }
 
