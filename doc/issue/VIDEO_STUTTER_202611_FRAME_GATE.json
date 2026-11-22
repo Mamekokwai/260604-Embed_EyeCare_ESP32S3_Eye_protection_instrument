@@ -1,0 +1,11 @@
+{
+  "normal_100_frames_both_versions": "PASS",
+  "startup_gate_busy_old_accept_us": 33333,
+  "startup_gate_busy_new_accept_us": 1000,
+  "second_frame_gate_busy_old_accept_us": 66666,
+  "second_frame_gate_busy_new_accept_us": 35000,
+  "long_stall_catchup_policy_same_in_both": true,
+  "gate_retry_regression": "PASS",
+  "scope": "Real rate/LCD gate source excerpt; clock and LCD readiness stubbed. Not device performance evidence.",
+  "conclusion": "500be5b prevents deadline advance on a rejected gate; steady no-gate timing and late catch-up policy are unchanged."
+}

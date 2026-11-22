@@ -1,0 +1,314 @@
+{
+  "collected_at": "2026-11-22T16:09:22.288754+08:00",
+  "repository": "E:\\Works\\2026\\0604-Embed_EyeCare_ESP32S3_320x320\\Software\\ESP32S3_Eye_protection_instrument",
+  "head": "f9d30862c9ce2dde58e044a4a1cb575e83402c72",
+  "baseline": "74a8b78cbd2ec41818a4515f955ae014f19cf296",
+  "scope": "Local source, local media and host tools; no flashing or device performance measurement.",
+  "videos": [
+    {
+      "path": "Public/SD_Source/video/弱视训练.avi",
+      "bytes": 15798964,
+      "sha256": "5fa6a138e376328ba122ae9f4cbd344a57be4f9b8fe7f142c7c68a6041a5690e",
+      "git_blob": "7b33af65aa845eebd743b2f6734d1db05d40454b",
+      "baseline_blob": "7b33af65aa845eebd743b2f6734d1db05d40454b",
+      "unchanged_from_baseline": true,
+      "stream": {
+        "codec_name": "mjpeg",
+        "width": 320,
+        "height": 320,
+        "avg_frame_rate": "30/1",
+        "time_base": "1/30",
+        "duration": "45.866667",
+        "nb_frames": "1376"
+      },
+      "packet_count": 1376,
+      "packet_duration_values": [
+        "0.033333"
+      ],
+      "avih_usec_per_frame": 33333,
+      "avih_total_frames": 1376,
+      "avih_streams": 1,
+      "jpeg_max_bytes": 16765,
+      "jpeg_p95_bytes": 15305,
+      "jpeg_over_96KiB": 0,
+      "decode_exit_code": 0,
+      "decode_errors": "",
+      "riff_chunks": [
+        {
+          "tag": "LIST",
+          "offset": 12,
+          "size": 4664,
+          "list_type": "hdrl"
+        },
+        {
+          "tag": "LIST",
+          "offset": 4684,
+          "size": 26,
+          "list_type": "INFO"
+        },
+        {
+          "tag": "JUNK",
+          "offset": 4718,
+          "size": 1016,
+          "list_type": null
+        },
+        {
+          "tag": "LIST",
+          "offset": 5742,
+          "size": 15771190,
+          "list_type": "movi"
+        },
+        {
+          "tag": "idx1",
+          "offset": 15776940,
+          "size": 22016,
+          "list_type": null
+        }
+      ]
+    },
+    {
+      "path": "Public/SD_Source/video/散光训练.avi",
+      "bytes": 15696942,
+      "sha256": "dd7da2b5d2aad624048d1539b6ba24fb20c9fcf7078c3c89f6c571f7068e6a2f",
+      "git_blob": "85ea8129828ba2ddff5918e5e0e6fbc4c7735d30",
+      "baseline_blob": "85ea8129828ba2ddff5918e5e0e6fbc4c7735d30",
+      "unchanged_from_baseline": true,
+      "stream": {
+        "codec_name": "mjpeg",
+        "width": 320,
+        "height": 320,
+        "avg_frame_rate": "30/1",
+        "time_base": "1/30",
+        "duration": "52.333333",
+        "nb_frames": "1570"
+      },
+      "packet_count": 1570,
+      "packet_duration_values": [
+        "0.033333"
+      ],
+      "avih_usec_per_frame": 33333,
+      "avih_total_frames": 1570,
+      "avih_streams": 1,
+      "jpeg_max_bytes": 22840,
+      "jpeg_p95_bytes": 21844,
+      "jpeg_over_96KiB": 0,
+      "decode_exit_code": 0,
+      "decode_errors": "",
+      "riff_chunks": [
+        {
+          "tag": "LIST",
+          "offset": 12,
+          "size": 4664,
+          "list_type": "hdrl"
+        },
+        {
+          "tag": "LIST",
+          "offset": 4684,
+          "size": 26,
+          "list_type": "INFO"
+        },
+        {
+          "tag": "JUNK",
+          "offset": 4718,
+          "size": 1016,
+          "list_type": null
+        },
+        {
+          "tag": "LIST",
+          "offset": 5742,
+          "size": 15666064,
+          "list_type": "movi"
+        },
+        {
+          "tag": "idx1",
+          "offset": 15671814,
+          "size": 25120,
+          "list_type": null
+        }
+      ]
+    },
+    {
+      "path": "Public/SD_Source/video/斜视训练.avi",
+      "bytes": 10350872,
+      "sha256": "9ac14e00b0a411db188d7e9f09975e838c73b9587e398f23783798788eadd30a",
+      "git_blob": "45e68f040bdba22592ea5795ab1aaa09e237391b",
+      "baseline_blob": "45e68f040bdba22592ea5795ab1aaa09e237391b",
+      "unchanged_from_baseline": true,
+      "stream": {
+        "codec_name": "mjpeg",
+        "width": 320,
+        "height": 320,
+        "avg_frame_rate": "30/1",
+        "time_base": "1/30",
+        "duration": "61.733333",
+        "nb_frames": "1852"
+      },
+      "packet_count": 1852,
+      "packet_duration_values": [
+        "0.033333"
+      ],
+      "avih_usec_per_frame": 33333,
+      "avih_total_frames": 1852,
+      "avih_streams": 1,
+      "jpeg_max_bytes": 8230,
+      "jpeg_p95_bytes": 7437,
+      "jpeg_over_96KiB": 0,
+      "decode_exit_code": 0,
+      "decode_errors": "",
+      "riff_chunks": [
+        {
+          "tag": "LIST",
+          "offset": 12,
+          "size": 4664,
+          "list_type": "hdrl"
+        },
+        {
+          "tag": "LIST",
+          "offset": 4684,
+          "size": 26,
+          "list_type": "INFO"
+        },
+        {
+          "tag": "JUNK",
+          "offset": 4718,
+          "size": 1016,
+          "list_type": null
+        },
+        {
+          "tag": "LIST",
+          "offset": 5742,
+          "size": 10315482,
+          "list_type": "movi"
+        },
+        {
+          "tag": "idx1",
+          "offset": 10321232,
+          "size": 29632,
+          "list_type": null
+        }
+      ]
+    },
+    {
+      "path": "Public/SD_Source/video/睫状肌近视远视训练.avi",
+      "bytes": 14381230,
+      "sha256": "7a137e8722617e36974bea8255477ab214aada6853f6b55ddc04a3264b146514",
+      "git_blob": "0282981264d07e95375881c3127bd4573e748f96",
+      "baseline_blob": "0282981264d07e95375881c3127bd4573e748f96",
+      "unchanged_from_baseline": true,
+      "stream": {
+        "codec_name": "mjpeg",
+        "width": 320,
+        "height": 320,
+        "avg_frame_rate": "30/1",
+        "time_base": "1/30",
+        "duration": "62.400000",
+        "nb_frames": "1872"
+      },
+      "packet_count": 1872,
+      "packet_duration_values": [
+        "0.033333"
+      ],
+      "avih_usec_per_frame": 33333,
+      "avih_total_frames": 1872,
+      "avih_streams": 1,
+      "jpeg_max_bytes": 12662,
+      "jpeg_p95_bytes": 12276,
+      "jpeg_over_96KiB": 0,
+      "decode_exit_code": 0,
+      "decode_errors": "",
+      "riff_chunks": [
+        {
+          "tag": "LIST",
+          "offset": 12,
+          "size": 4664,
+          "list_type": "hdrl"
+        },
+        {
+          "tag": "LIST",
+          "offset": 4684,
+          "size": 26,
+          "list_type": "INFO"
+        },
+        {
+          "tag": "JUNK",
+          "offset": 4718,
+          "size": 1016,
+          "list_type": null
+        },
+        {
+          "tag": "LIST",
+          "offset": 5742,
+          "size": 14345520,
+          "list_type": "movi"
+        },
+        {
+          "tag": "idx1",
+          "offset": 14351270,
+          "size": 29952,
+          "list_type": null
+        }
+      ]
+    }
+  ],
+  "profile_log_budget": {
+    "info_log_calls": 12,
+    "frames_per_report": 100,
+    "nominal_report_period_s_at_30fps": 3.3333333333333335,
+    "baseline_calls_identical": true,
+    "model_only_not_hardware_measurement": true,
+    "sample_formatted_bytes_including_prefix_crlf": 738,
+    "sample_prefix": "I (100000) video_player: ",
+    "baud": 115200,
+    "uart_8n1_wire_time_ms": 64.0625,
+    "optimistic_wait_ms_after_128_byte_fifo": 52.951388888888886,
+    "nominal_video_frame_ms": 33.333333333333336,
+    "caveat": "Example numeric values and prefix. Actual log length, FIFO state, USB waits, preemption and driver setup must be measured on device."
+  },
+  "console_config": [
+    "CONFIG_ESP_CONSOLE_UART_DEFAULT=y",
+    "CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG=y",
+    "CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED=y",
+    "CONFIG_ESP_CONSOLE_UART=y",
+    "CONFIG_ESP_CONSOLE_UART_NUM=0",
+    "CONFIG_ESP_CONSOLE_ROM_SERIAL_PORT_NUM=0",
+    "CONFIG_ESP_CONSOLE_UART_BAUDRATE=115200",
+    "CONFIG_FREERTOS_HZ=1000",
+    "CONFIG_LOG_DEFAULT_LEVEL_INFO=y",
+    "CONFIG_LOG_DEFAULT_LEVEL=3"
+  ],
+  "background_music": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "mp3",
+        "sample_rate": "44100",
+        "channels": 2,
+        "bit_rate": "128000"
+      }
+    ],
+    "format": {
+      "duration": "259.645533"
+    }
+  },
+  "inspected_firmware": {
+    "path": "D:\\Download\\ESP32S3_Eye_protection_instrument_f9d3086_build\\template-app.bin",
+    "bytes": 758464,
+    "sha256": "728fb588d3d36578e794614fd34d818f47a1e255d14dbc80e8b9badd4f1ff3f6",
+    "contains_video_profile_log": true,
+    "contains_audio_supply_log": true,
+    "caveat": "Presence confirms compiled strings, not the customer's currently flashed image or runtime log filtering."
+  },
+  "serial_inventory": [
+    {
+      "device": "COM11",
+      "description": "蓝牙链接上的标准串行 (COM11)",
+      "hwid": "BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000102B0_PID&0000\\7&1651D211&0&241AE62AF5C6_C00000000"
+    },
+    {
+      "device": "COM10",
+      "description": "蓝牙链接上的标准串行 (COM10)",
+      "hwid": "BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\7&1651D211&0&000000000000_00000000"
+    }
+  ]
+}

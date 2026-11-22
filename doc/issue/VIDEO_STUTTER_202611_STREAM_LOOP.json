@@ -1,0 +1,45 @@
+{
+  "scope": "Real avi.c + stream functions; FatFS/heap wrapped by host stdio/malloc. Verifies parsing and repeat order, not SD latency or DMA concurrency.",
+  "results": [
+    {
+      "file": "Public/SD_Source/video/弱视训练.avi",
+      "frames_per_loop": 1376,
+      "second_loop_frames": 1376,
+      "ordered_jpeg_hash": 2963265540,
+      "loop_hash_equal": true,
+      "read_calls_first_loop": 963,
+      "read_calls_second_loop": 963,
+      "result": "PASS"
+    },
+    {
+      "file": "Public/SD_Source/video/散光训练.avi",
+      "frames_per_loop": 1570,
+      "second_loop_frames": 1570,
+      "ordered_jpeg_hash": 1426845471,
+      "loop_hash_equal": true,
+      "read_calls_first_loop": 957,
+      "read_calls_second_loop": 957,
+      "result": "PASS"
+    },
+    {
+      "file": "Public/SD_Source/video/斜视训练.avi",
+      "frames_per_loop": 1852,
+      "second_loop_frames": 1852,
+      "ordered_jpeg_hash": 1887814091,
+      "loop_hash_equal": true,
+      "read_calls_first_loop": 630,
+      "read_calls_second_loop": 630,
+      "result": "PASS"
+    },
+    {
+      "file": "Public/SD_Source/video/睫状肌近视远视训练.avi",
+      "frames_per_loop": 1872,
+      "second_loop_frames": 1872,
+      "ordered_jpeg_hash": 2066434966,
+      "loop_hash_equal": true,
+      "read_calls_first_loop": 876,
+      "read_calls_second_loop": 876,
+      "result": "PASS"
+    }
+  ]
+}
