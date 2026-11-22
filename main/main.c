@@ -90,18 +90,24 @@ static void display_tick(void)
     {
     case DISPLAY_VIDEO_PLAYING:
         ret = flash_player_tick();
+        if (ret == PLAYER_OK)
+            app_uart_video_display_complete();
         if (ret == PLAYER_ERROR)
         {
             ESP_LOGE(TAG, "Flash player error");
+            app_uart_video_display_complete();
             flash_player_stop();
             g_display_mode = DISPLAY_IDLE;
         }
         break;
     case DISPLAY_SD_VIDEO_PLAYING:
         ret = video_player_tick();
+        if (ret == PLAYER_OK)
+            app_uart_video_display_complete();
         if (ret == PLAYER_ERROR)
         {
             ESP_LOGE(TAG, "SD video player error");
+            app_uart_video_display_complete();
             video_player_stop();
             app_uart_send("ERR VID playback");
             g_display_mode = DISPLAY_IDLE;
@@ -174,6 +180,7 @@ static void monitor_tick(void)
                 if (g_display_mode == DISPLAY_SD_VIDEO_PLAYING ||
                     g_display_mode == DISPLAY_SD_VIDEO_PAUSED)
                 {
+                    app_uart_video_display_complete();
                     video_player_stop();
                     g_display_mode = DISPLAY_IDLE;
                 }

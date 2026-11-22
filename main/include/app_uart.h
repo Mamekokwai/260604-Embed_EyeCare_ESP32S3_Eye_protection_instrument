@@ -33,3 +33,6 @@ bool app_uart_start_sd_error_image(void);
 
 /* 图片显示完成或失败后，提交临时背光恢复。 */
 void app_uart_image_display_complete(void);
+
+/* 视频首帧完成或播放失败后，提交临时背光恢复。 */
+void app_uart_video_display_complete(void);

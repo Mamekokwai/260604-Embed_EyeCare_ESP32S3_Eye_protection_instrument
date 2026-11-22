@@ -638,6 +638,7 @@ static void cmd_handle(const char *cmd)
         }
         else
         {
+            app_uart_video_display_complete();
             char response[64];
             snprintf(response, sizeof(response), "ERR VPLAY %s",
                      esp_err_to_name(ret));
@@ -684,6 +685,7 @@ static void cmd_handle(const char *cmd)
         if (is_flash_video_mode() || is_sd_video_mode())
         {
             stop_display_video();
+            app_uart_video_display_complete();
             g_display_mode = DISPLAY_IDLE;
             spilcd_show_string(0, 0, 320, 16, 16, "Idle", BLACK);
             uart_send_str("OK VSTOP");
@@ -745,6 +747,7 @@ static void cmd_handle(const char *cmd)
         }
         else
         {
+            app_uart_video_display_complete();
             char response[64];
             snprintf(response, sizeof(response), "ERR VID %s",
                      esp_err_to_name(ret));
@@ -1329,7 +1332,7 @@ bool app_uart_start_sd_error_image(void)
     return true;
 }
 
-void app_uart_image_display_complete(void)
+static void restore_temporary_backlight(void)
 {
     if (!s_temporary_backlight_off)
         return;
@@ -1339,6 +1342,16 @@ void app_uart_image_display_complete(void)
     else
         spilcd_backlight_set(s_temporary_backlight_restore);
     s_temporary_backlight_off = false;
+}
+
+void app_uart_image_display_complete(void)
+{
+    restore_temporary_backlight();
+}
+
+void app_uart_video_display_complete(void)
+{
+    restore_temporary_backlight();
 }
 
 /* ---- 单字符指令解析 ---- */
