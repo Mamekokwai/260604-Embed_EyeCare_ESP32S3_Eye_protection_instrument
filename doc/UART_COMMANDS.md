@@ -172,17 +172,17 @@ USB Serial-JTAG 默认输入编码为 UTF-8，UART1 默认输入编码为 GBK；
 
 ### CA51F 眼保仪训练资源
 
-CA51F 使用已有的 `IMG`、`VID`、`APLAY` 指令组合，不需要 ESP32 新增训练专用指令。路径参数通过 UART1 按 GBK 发送；视频文件必须已经转换为 AVI/MJPEG 后放入 SD 卡：
+CA51F 使用已有的 `IMG`、`VID`、`APLAYONCE`、`APLAY` 指令组合，不需要 ESP32 新增训练专用指令。路径参数通过 UART1 按 GBK 发送；视频文件必须已经转换为 AVI/MJPEG 后放入 SD 卡：
 
-| 训练模式 | 提示图 | 视频 | vocal | 背景音乐 |
+| 训练模式 | 档位图片 | 视频 | vocal | 背景音乐 |
 | --- | --- | --- | --- | --- |
-| 弱视 | `img/弱视训练.jpg` | `video/弱视训练.avi` | `music/vocal/弱视.mp3` | `music/1.mp3` |
-| 散光 | `img/散光训练.jpg` | `video/散光训练.avi` | `music/vocal/散光.mp3` | `music/1.mp3` |
-| 斜视 | `img/斜视训练.jpg` | `video/斜视训练.avi` | `music/vocal/斜视.mp3` | `music/1.mp3` |
-| 睫状肌近视远视 | `img/睫状肌训练.jpg` | `video/睫状肌近视远视训练.avi` | `music/vocal/近视.mp3` | `music/1.mp3` |
-| 脉冲档位 1～10 | `img/脉冲训练N.jpg` | 无 | `music/vocal/脉冲按摩.mp3` | `music/1.mp3` |
+| 散光 | 无 | `video/散光训练.avi` | `music/vocal/散光.mp3` | `music/1.mp3` |
+| 弱视 | 无 | `video/弱视训练.avi` | `music/vocal/弱视.mp3` | `music/1.mp3` |
+| 斜视 | 无 | `video/斜视训练.avi` | `music/vocal/斜视.mp3` | `music/1.mp3` |
+| 睫状肌近视远视 | 无 | `video/睫状肌近视远视训练.avi` | `music/vocal/近视.mp3` | `music/1.mp3` |
+| 脉冲档位 0～15 | `img/脉冲训练N.jpg` | 无 | `music/vocal/脉冲按摩.mp3` | `music/1.mp3` |
 
-四个视频模式的时序是 `IMG` → 约 1 秒 → `VID` → vocal；CA51 根据资源实测的约 2.74～2.95 秒 vocal 时长，先发送现有 `ASTOP`，再发送 `APLAY music/1.mp3`。ESP32 默认只循环当前 vocal 或背景音乐，不切换到目录中的其他音频；ESP32 不提供音频完成通知，因此替换 vocal 文件后应由 CA51 重新核对等待时间。脉冲模式只使用 `IMG` 档位图并保留 EMS，由 CA51 负责。
+四个视频模式进入时直接发送 `VID` 和对应 vocal 的 `APLAYONCE`，取消训练提示图及约 1 秒等待。CA51 根据资源实测的 vocal 时长（约 2.74～2.95 秒）加 500 ms 缓冲后，发送 `APLAY music/1.mp3` 循环背景音乐。vocal 单次播放完成即停止，ESP32 不提供音频完成通知，因此替换 vocal 文件后应由 CA51 重新核对等待时间。脉冲模式继续使用 `IMG` 显示 0～15 档图片，进入时单播 vocal 后接背景音乐，调档只更新图片；EMS 由 CA51 负责。
 
 ## 背光指令
 
