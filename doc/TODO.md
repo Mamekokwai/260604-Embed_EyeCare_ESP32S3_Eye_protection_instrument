@@ -2,7 +2,7 @@
 
 ## 量产前安全门禁
 
-以下事项全部完成并留存验收记录后，才允许烧录生产镜像、启用安全 eFuse 或进入量产：
+以下生产安全事项只适用于 `product` 分支；`main` 仅用于开发测试，不启用这些功能：
 
 - [ ] 建立独立的生产构建目录和配置：使用全新的 `build-production`，显式启用 Secure Boot V2、Release Flash Encryption、NVS 加密和 `EYECARE_PRODUCTION_LOCK`；开发配置不得用于量产。
 - [ ] 关闭生产固件的 USB Serial-JTAG、调试控制台和 `GPIO4`/`GPIO5`/`I2CTEST`/`I2CFIX` 等调试指令，仅保留必要的 UART1 业务链路。

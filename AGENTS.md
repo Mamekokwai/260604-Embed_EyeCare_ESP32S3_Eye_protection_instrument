@@ -43,7 +43,7 @@ Do not commit generated `build/` output, private media, or device-specific secre
 
 中文显示：FATFS 用 CODEPAGE_936（`d_name` 为 GBK 双字节），启动提示走内嵌点阵字库（`gbk_embedded_font.h`），SDLIST 中文文件名走 TF 卡 `/SYSTEM/FONT/GBK16.FON`（`gbk_font.c`）。媒体递归路径在固件内部为 GBK；UART1 响应默认 GBK，USB Serial-JTAG 响应默认 UTF-8，可通过 `ENC UTF8|GBK` 为当前链路独立切换。新增/删除字库或改编码前检查 `sdkconfig.defaults` 的 FATFS 配置。
 
-`VIDLIST`, `IMGLIST`, and `ALIST` recursively scan TF subdirectories; `SDLIST` remains a root-directory LCD browser. Production builds additionally use `sdkconfig.production.defaults`, Secure Boot V2, Release-mode Flash Encryption, and the one-time SD authorization flow in `doc/SECURITY_PROVISIONING.md`. Never flash a production build to a development board or burn eFuses without an explicit hardware provisioning step.
+`VIDLIST`, `IMGLIST`, and `ALIST` recursively scan TF subdirectories; `SDLIST` remains a root-directory LCD browser. `main` is a development-only branch and does not compile production authorization, Secure Boot V2, Flash Encryption, NVS encryption, or eFuse-unlock code. Those features belong only to `product`; never flash a production build to a development board or burn eFuses without an explicit hardware provisioning step.
 
 ## 文档-固件同步规则（每次改硬件/引脚/固件行为必须执行）
 

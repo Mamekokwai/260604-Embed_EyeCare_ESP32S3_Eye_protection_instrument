@@ -19,22 +19,20 @@
 - 调试转发：UART1 收到的 CA51 完整行会以 `CA51 ` 前缀异步转发到 USB Serial-JTAG；`DBG ` 行只转发、不进入业务解析，也不会向 CA51 返回 `ERR unknown`。JTAG 可用 `CA51FWD ON|OFF` 开关，`CA51FWD?` 查询状态。
 - 低功耗睡眠：`SLEEP` 停止媒体、关闭背光并暂停 1 ms 主调度 tick，仅低频轮询 UART1/JTAG；睡眠期间仍可接收并响应控制指令，`WAKE` 恢复调度和背光。
 - 启动显示：无 TF 卡时显示 Flash 中的 `SDCard.jpg`；TF 卡就绪后自动分片显示 SD 卡 `img/start.jpg`，不再自动播放 Flash 视频；启动图缺失时显示 `READY / NO START IMAGE`。
-- 生产安全：代码支持 USB Serial-JTAG 单机授权（P-256 签名绑定 MAC/NVS 序列号/challenge + `EYECARE_UNLOCKED` eFuse）及 Secure Boot V2/Release Flash Encryption；当前开发与生产增量配置均暂时关闭，待量产流程确认后再启用。详见 [SECURITY_PROVISIONING.md](SECURITY_PROVISIONING.md)。
+- 开发安全边界：`main` 仅用于开发测试，不编译生产授权、eFuse、Secure Boot、Flash Encryption 或 NVS 加密代码；这些内容仅保留在 `product` 分支。
 
 代码与文档的基准事实见 [CURRENT_IMPLEMENTATION.md](CURRENT_IMPLEMENTATION.md)，完整指令见 [UART_COMMANDS.md](UART_COMMANDS.md)，移植说明见 [PORTING.md](PORTING.md)，量产前清单见 [TODO.md](TODO.md)，仓库与 Obsidian 的整理范围见 [DOCUMENTATION_ALIGNMENT.md](DOCUMENTATION_ALIGNMENT.md)。架构图和历史 RCA 分别位于 [`Map/`](Map/) 与 [`issue/`](issue/)。
 
 ## 目录
 
 ```text
-main/                         应用状态机、UART、媒体播放与生产解锁
+main/                         应用状态机、UART 和媒体播放
 components/BSP/               LCD、SDMMC/SPI fallback、I2C 板级驱动
 components/esp_lcd_jd9855/    JD9855 面板驱动和初始化序列
 doc/                          项目文档、架构图、硬件参考和历史 RCA
 tools/linux/                  视频转换、Flash 媒体写入脚本
-tools/security/               生产授权令牌工具（`unlock_token.py` + 一键脚本 `unlock_provision.sh`）
 partitions.csv                16 MiB Flash 分区表
 sdkconfig.defaults            开发/公共默认配置
-sdkconfig.production.defaults 生产安全增量配置
 ```
 
 ## 构建
@@ -67,20 +65,7 @@ Windows PowerShell 媒体烧录：
 `Set-ExecutionPolicy -Scope Process Bypass`。该工具只写入 `storage` 媒体分区，
 不会烧录应用固件或修改 eFuse。
 
-生产构建必须使用独立配置文件和构建目录；不要让仓库根目录的开发 `sdkconfig` 覆盖安全默认值：
-
-```bash
-idf.py -B build-production \
-  -D SDKCONFIG=sdkconfig.production \
-  -D 'SDKCONFIG_DEFAULTS=sdkconfig.defaults;sdkconfig.production.defaults' \
-  build
-```
-
-生产镜像首次启动会执行不可逆的安全 eFuse 操作。先阅读生产指南，并只在备用板上走通全流程；不要直接在开发板执行生产 `flash`。
-
-生产构建完成后会在 `build-production/storage.bin` 中包含 Flash 无卡提示图
-`SDCard.jpg`；可运行 `python tools/security/production_preflight.py --build-dir build-production`
-做只读预检。生产烧录脚本会将该 storage 镜像与固件一并写入。
+生产构建不属于 `main`。需要生产授权、Secure Boot、Flash Encryption 或 eFuse 操作时，必须切换到 `product` 分支并按生产流程执行；开发板不得使用生产配置。
 
 ## 关键引脚
 
@@ -107,4 +92,4 @@ GPIO0 不参与当前 SDMMC 1-bit 数据传输。GPIO38 是 LCD D/C，不是 UAR
 
 ## 验证
 
-当前没有自动化硬件测试。提交前至少运行开发构建；在硬件上验证 `STATUS`、`VPLAY`、`VIDLIST`/`VID`、`IMGLIST`/`IMG`、`ALIST`/`APLAY`，并检查双屏同步、RGB565 色序、撕裂、PSRAM/cache 与 DMA 行为。生产安全还必须完成指南中的错误令牌、掉电、重启和密文回读测试。
+当前没有自动化硬件测试。提交前至少运行开发构建；在硬件上验证 `STATUS`、`VPLAY`、`VIDLIST`/`VID`、`IMGLIST`/`IMG`、`ALIST`/`APLAY`，并检查双屏同步、RGB565 色序、撕裂、PSRAM/cache 与 DMA 行为。

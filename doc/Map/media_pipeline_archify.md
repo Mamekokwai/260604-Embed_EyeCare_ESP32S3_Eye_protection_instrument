@@ -6,7 +6,8 @@
 
 ```mermaid
 flowchart TD
-    BOOT[签名应用启动] --> FLAG{EYECARE_UNLOCKED eFuse?}
+    %% 以下生产安全链路仅适用于 product 分支，不属于 main 开发固件。
+    BOOT[生产签名应用启动] --> FLAG{EYECARE_UNLOCKED eFuse?}
     FLAG -->|是| APP[初始化 LCD / 音频 / UART / 媒体]
     FLAG -->|否| SD[仅挂载 TF 卡]
     USB --> TOKEN[READ_ID / CHALLENGE / ACTIVATE 单机授权]
@@ -16,7 +17,7 @@ flowchart TD
     BURN --> APP
 ```
 
-生产锁只由 `sdkconfig.production.defaults` 启用；开发构建直接进入应用。私钥不在 TF 卡和固件中，USB 授权帧绑定设备 MAC、NVS 序列号和一次性 challenge。生产内容保密依赖 Secure Boot V2 与 Release 模式 Flash Encryption，详见上级目录 [`SECURITY_PROVISIONING.md`](../SECURITY_PROVISIONING.md)。
+以上生产锁链路只在 `product` 分支启用；`main` 开发构建不包含授权、Secure Boot 或 Flash Encryption 代码。
 
 ## 总体媒体链路
 

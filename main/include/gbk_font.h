@@ -18,15 +18,12 @@
  * 显示函数要求字符串为 GBK 编码 (FATFS CODEPAGE_936, d_name 为 GBK 双字节)。
  *
  * 启动提示 (无卡时也用) 由内嵌小字库提供, 不依赖 TF 卡:
- *   请 / 插 / 入 / 卡 / 解 / 密 / 请 (boot gate 提示)
+ *   请 / 插 / 入 / 卡 (boot gate 提示)
  */
 
 /* ---- 内嵌小字库 (固定提示字, 无卡也显示) ---- */
 /** "请插入SD卡" 里的汉字: 请插[入SD]卡 → 请,插,入,卡 */
 void gbk_show_boot_text(uint16_t x, uint16_t y, uint16_t color);
-
-/** "未进行生产测试" 提示 */
-void gbk_show_production_test_text(uint16_t x, uint16_t y, uint16_t color);
 
 /* ---- TF 卡字库 (任意中文文件名) ---- */
 
