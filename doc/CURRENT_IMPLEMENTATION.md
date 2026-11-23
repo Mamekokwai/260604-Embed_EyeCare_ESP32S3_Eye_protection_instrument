@@ -32,9 +32,9 @@ SD 视频只使用 AVI `SecPerFrame` 做帧率控制，并以 LCD DMA 完成事�
 
 | 项目 | 当前实现 |
 |---|---|
-| 启动门与热插拔 | `app_main` 先 `spilcd_init` 再 `boot_gate()`：TF 卡座无 CD 检测脚，首次挂载前等待 300 ms，每次挂载最多重试 3 次（间隔 100 ms）；无 SD 卡时显示 Flash 中的 `SDCard.jpg`（不依赖字库）并重试。运行中每 2 s 用 CMD13 探测卡状态，拔卡时先停止 SD 视频/音频并卸载文件系统，重新插卡后自动重挂载；已挂载且在线时不会重复卸载挂载。`IMG` 执行前和读取失败后均复核 SD 状态，确认无卡时统一切换到 Flash `SDCard.jpg`，不显示 `IMAGE ERROR` 字体页。加密开启且未解锁显示`未进行生产测试`并尝试授权，通过后进入正常启动。启动门通过后自动分片显示 SD 卡 `img/start.jpg`，不再自动播放 Flash 视频；启动图缺失时显示 `READY / NO START IMAGE`。 |
+| 启动门与热插拔 | `app_main` 先 `spilcd_init` 再 `boot_gate()`：TF 卡座无 CD 检测脚，首次挂载前等待 300 ms，每次挂载最多重试 3 次（间隔 100 ms）；无 SD 卡时显示 Flash 中的 `SDCard.jpg`（不依赖字库）并重试。运行中每 2 s 用 CMD13 探测卡状态，拔卡时先停止 SD 视频/音频并卸载文件系统，重新插卡后自动重挂载；已挂载且在线时不会重复卸载挂载。`IMG` 执行前和读取失败后均复核 SD 状态，确认无卡时统一切换到 Flash `SDCard.jpg`，不显示 `IMAGE ERROR` 字体页。启动门通过后自动分片显示 SD 卡 `img/start.jpg`，不再自动播放 Flash 视频；启动图缺失时显示 `READY / NO START IMAGE`。 |
 | 用户设置 | NVS 命名空间 `eyecare` 保存 `volume`、`backlight` 两个 5~100 参数；启动最前面读取，音频初始化后应用音量，LCD 初始化后延迟 1 s 应用背光；`VOL`/`BL` 设置成功后立即提交 NVS，掉电后恢复。支持 `VOL±`/`BL±` 步进 1，以及 `VOL±±`/`BL±±` 步进 10，边界自动钳位到各自宏定义的 5~100；`BLOFF`/`BLON` 仅临时关闭/恢复背光，不写入 NVS。 |
-| 中文字库 | ① 内嵌 `gbk_embedded_font.h`（解密提示等无卡后续流程），② TF 卡 `/SYSTEM/FONT/GBK16.FON`（完整 GBK16 字库，SDLIST 任意中文文件名）。无 SD 卡启动画面使用 Flash 中的 `SDCard.jpg`，不依赖字库。FATFS 用 CODEPAGE_936 + ANSI/OEM，`d_name` 返回 GBK 双字节 |
+| 中文字库 | ① 内嵌 `gbk_embedded_font.h`（无卡启动提示），② TF 卡 `/SYSTEM/FONT/GBK16.FON`（完整 GBK16 字库，SDLIST 任意中文文件名）。无 SD 卡启动画面使用 Flash 中的 `SDCard.jpg`，不依赖字库。FATFS 用 CODEPAGE_936 + ANSI/OEM，`d_name` 返回 GBK 双字节 |
 | 主循环 | 正常模式为 1 ms tick、5 个 cooperative workspace，视频每 1 ms 快速服务；`SLEEP` 时停止 tick，仅每 20 ms 轮询 UART1/JTAG 命令，`WAKE` 后恢复调度 |
 | Flash 视频 | AVI/MJPEG，mmap `storage`，兼容媒体索引 v1/v2，PSRAM 双帧，2×40 行内部 SRAM DMA 条带 |
 | TF 视频 | MJPEG AVI ≤320×320，16 KiB 流读取，PSRAM 双帧，1×80 行 DMA 条带 |
@@ -47,16 +47,15 @@ CA51F 当前训练媒体调用 `VID`、`APLAYONCE`、`APLAY`、`ASTOP` 以及脉
 
 ## Flash 分区
 
-| 分区 | 开发偏移 | 生产偏移 | 大小 | 用途 |
-|---|---:|---:|---:|---|
-| 分区表 | 0x8000 | 0x10000 | 4 KiB | 生产偏移为签名 bootloader 留空间 |
-| `nvs` | 0x9000 | 0x11000 | 24 KiB | NVS |
-| `phy_init` | 0xF000 | 0x17000 | 4 KiB | PHY |
-| `factory` | 0x10000 | 0x20000 | 1 MiB | 应用 |
-| `storage` | 0x110000 | 0x120000 | 14 MiB | Flash FAT 媒体，生产配置下加密 |
-| `nvs_keys` | 0xF10000 | 0xF20000 | 4 KiB | NVS 加密密钥，生产配置下加密 |
+| 分区 | 偏移 | 大小 | 用途 |
+|---|---:|---:|---|
+| 分区表 | 0x8000 | 4 KiB | 开发分区表 |
+| `nvs` | 0x9000 | 24 KiB | NVS |
+| `phy_init` | 0xF000 | 4 KiB | PHY |
+| `factory` | 0x10000 | 1 MiB | 应用 |
+| `storage` | 0x110000 | 14 MiB | Flash FAT 媒体，明文开发分区 |
 
-当前只有 factory 应用分区，没有 OTA 槽。开发配置和当前生产增量配置均关闭生产锁及 Secure Boot/Flash Encryption；待量产流程确认后，才允许恢复 `sdkconfig.production.defaults` 中的安全选项。
+当前只有 factory 应用分区，没有 OTA 槽。生产安全配置不属于 `main`，请在 `product` 分支单独维护。
 
 ## 文档状态规则
 

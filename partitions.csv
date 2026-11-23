@@ -1,7 +1,6 @@
 # Name,   Type, SubType, Offset,  Size, Flags
-# 16MB flash: factory 1MB + encrypted media storage + NVS key partition
+# 16MB flash: factory 1MB + plain media storage
 nvs,      data, nvs,     ,        0x6000,
 phy_init, data, phy,     ,        0x1000,
 factory,  app,  factory, ,        1M,
-storage,  data, fat,     ,        14M, encrypted
-nvs_keys, data, nvs_keys, ,       0x1000, encrypted
+storage,  data, fat,     ,        14M,

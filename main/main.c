@@ -21,11 +21,8 @@
 #include "audio_player.h"
 #include "image_viewer.h"
 #include "app_uart.h"
-#include "production_unlock.h"
 #include "app_settings.h"
 #include "gbk_font.h"
-#include "esp_efuse.h"
-#include "esp_efuse_custom_table.h"
 
 #define TAG "app"
 
@@ -247,20 +244,6 @@ static void boot_gate(void)
     vTaskDelay(pdMS_TO_TICKS(300));
     while (1)
     {
-#if EYECARE_ENABLE_ENCRYPTION
-        /* 生产锁定设备先走 USB Serial-JTAG 单机授权，不依赖 TF 卡。 */
-        if (!esp_efuse_read_field_bit(ESP_EFUSE_USER_DATA_EYECARE_UNLOCKED))
-        {
-            ESP_LOGW(TAG, "Device locked; waiting for USB authorization");
-            gbk_show_production_test_text(104, 150, BLACK);
-            if (!production_unlock_ensure())
-            {
-                vTaskDelay(pdMS_TO_TICKS(500));
-                continue;
-            }
-            spilcd_clear(WHITE);
-        }
-#endif
         /* 1. 检查 SD 卡 */
         esp_err_t sd_ret = sd_card_mount();
         if (sd_ret != ESP_OK)
@@ -275,28 +258,7 @@ static void boot_gate(void)
             continue;
         }
 
-        /* 2. 检查解密 (仅加密开启时) */
-#if EYECARE_ENABLE_ENCRYPTION
-        if (!esp_efuse_read_field_bit(ESP_EFUSE_USER_DATA_EYECARE_UNLOCKED))
-        {
-            ESP_LOGW(TAG, "Device locked; waiting for unlock token");
-            gbk_show_production_test_text(104, 150, BLACK); /* 白底黑字: 未进行生产测试 */
-            if (production_unlock_ensure())
-            {
-                spilcd_clear(WHITE);
-                return; /* 已解锁, 进入系统 */
-            }
-            vTaskDelay(pdMS_TO_TICKS(500));
-            continue;
-        }
-        if (!production_unlock_ensure())
-        {
-            /* 安全 eFuse 未启用时生产锁失败, 直接放行开发板 */
-            ESP_LOGE(TAG, "Production unlock unavailable");
-        }
-#endif
-
-        return; /* 卡已插入 + 已解锁 → 正常启动 */
+        return; /* 卡已插入 → 正常启动 */
     }
 }
 
