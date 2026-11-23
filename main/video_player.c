@@ -660,9 +660,12 @@ player_ret_t video_player_tick(void)
                 g_vp.prof_rate_wait += now - g_vp.rate_wait_started_at;
                 g_vp.rate_wait_started_at = 0;
             }
+            g_vp.next_ts += g_vp.avi.SecPerFrame;
         }
         else
         {
+            g_vp.first_vf = false;
+            g_vp.next_ts = esp_timer_get_time() + g_vp.avi.SecPerFrame;
         }
 
         int64_t now = esp_timer_get_time();
@@ -685,17 +688,6 @@ player_ret_t video_player_tick(void)
         int64_t te_started_at = esp_timer_get_time();
         spilcd_wait_te();
         g_vp.prof_lcd_gate_wait += esp_timer_get_time() - te_started_at;
-        /* 只有真正通过 LCD gate 才推进时间戳；否则 gate 忙时，当前帧
-         * 不应被错误地推迟到下一帧周期。 */
-        if (g_vp.first_vf)
-        {
-            g_vp.first_vf = false;
-            g_vp.next_ts = esp_timer_get_time() + g_vp.avi.SecPerFrame;
-        }
-        else
-        {
-            g_vp.next_ts += g_vp.avi.SecPerFrame;
-        }
         g_vp.strip_ys = 0;
         g_vp.strip_submitted = 0;
         g_vp.lcd_done_base = refresh_done_count;
