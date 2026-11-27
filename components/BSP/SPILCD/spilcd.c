@@ -13,6 +13,7 @@
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_jd9855.h"
+#include "screen_v2_init.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "esp_heap_caps.h"
@@ -158,6 +159,7 @@ esp_err_t spilcd_init(void)
         .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
         .bits_per_pixel = 16,
         .data_endian = LCD_RGB_DATA_ENDIAN_BIG,
+        .vendor_config = (void *)&gd150hv184r_a_vendor_config,
     };
 
     esp_err_t ret = esp_lcd_new_panel_jd9855(io_handle, &panel_cfg, &panel_handle);
@@ -174,7 +176,7 @@ esp_err_t spilcd_init(void)
     spilcd_display_dir(2); // 屏幕朝向(0,1,2,3) 0=默认, 1=旋转90度, 2=旋转180度, 3=旋转270度
     spilcd_clear(BLACK);
 
-    ESP_LOGI(TAG, "LCD JD9855 i80 init OK (320x320)");
+    ESP_LOGI(TAG, "LCD GD150HV184R-A/JD9855 i80 init OK (320x320)");
     return ESP_OK;
 }
 

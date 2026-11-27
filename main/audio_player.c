@@ -433,12 +433,12 @@ static void audio_service_task(void *arg)
             audio_amp_set_enabled(false);
         }
         audio_unlock();
+        /* 固定 1ms 节拍：taskYIELD 会让音频任务(优先级5)在 I2S 缓冲有空位时
+         * 紧循环独占 CPU1，饿死同核优先级4的视频JPEG解码任务，造成周期性掉帧。 */
         if (!active)
             vTaskDelay(pdMS_TO_TICKS(50));
-        else if (result == PLAYER_BUSY)
-            vTaskDelay(pdMS_TO_TICKS(1));
         else
-            taskYIELD();
+            vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 

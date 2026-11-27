@@ -37,10 +37,10 @@
 
 #define TAG "video_player"
 
-#define DMA_BUF_SIZE (16 * 1024)
+#define DMA_BUF_SIZE (32 * 1024)
 #define FRAME_BUF_SIZE (320 * 320 * sizeof(uint16_t))
 #define MAX_JPEG_SIZE (96 * 1024)
-#define VP_STRIP_H 80 // 写入条带高度；减小单次 DMA 缓冲以降低内部 SRAM 峰值
+#define VP_STRIP_H 160 // 保持每帧两次 DMA，减少 LCD 事务开销
 #define VP_STRIP_BYTES (VP_STRIP_H * 320 * sizeof(uint16_t))
 #define VP_STRIP_BUFS 1
 #define VP_DECODE_TASK_CORE 1
